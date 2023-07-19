@@ -1,0 +1,15 @@
+{
+  "include": ["**/*.js"],
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "ES6",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowJs": true,
+    "checkJs": true,
+    "removeComments": true
+  }
+}
