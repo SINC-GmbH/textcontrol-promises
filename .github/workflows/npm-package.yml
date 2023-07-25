@@ -34,7 +34,7 @@ jobs:
           ${{ env.AZURE_ARTIFACTS_FEED_URL }}:_password=${{ secrets.AZURE_ARTIFACTS_BASE64_PAT }}
           ${{ env.AZURE_ARTIFACTS_FEED_URL }}:email=npm requires email to be set but doesn't use the value
           ; end auth token" > /home/runner/work/_temp/.npmrc
-      - run: yarn
-      - run: yarn publish      
-#      - run: npm ci
-#      - run: npm publish
+#      - run: yarn
+#      - run: yarn publish      
+      - run: npm ci
+      - run: npm publish
