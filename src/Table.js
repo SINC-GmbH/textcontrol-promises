@@ -14,7 +14,8 @@ export class Table {
      */
     constructor(txTable) {
         this.#txTable = txTable;
-        this.#cells = new TableCellCollection(this.#txTable.cells)
+        this.#bindCallbacks();
+        this.#cells = new TableCellCollection(this.#txTable.cells);
     }
 
     /**
