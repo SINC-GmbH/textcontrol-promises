@@ -7,8 +7,6 @@ on:
   workflow_dispatch:
   
 env:
-  AZURE_ARTIFACTS_FEED_URL: 'tfs.sinc.de/tfs/Intern/_packaging/SINC_Cases/npm/'
-  AZURE_ARTIFACTS_USERNAME: 'bna'
   NODE_VERSION: 18
 
 jobs:
@@ -20,29 +18,3 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - run: yarn
-      
-  publisch-azure-artifacts:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: https://${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/
-          always-auth: true
-          
-      - name: Replace with appropriate .npmrc
-        run: |
-          echo "registry=https://${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/
-          always-auth=true
-          ; begin auth token
-          ${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/:username=${{ env.AZURE_ARTIFACTS_USERNAME }}
-          ${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/:_password=${{ secrets.AZURE_ARTIFACTS_BASE64_PAT }}
-          ${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/:email=npm requires email to be set but doesn't use the value
-          ${{ env.AZURE_ARTIFACTS_FEED_URL }}:username=${{ env.AZURE_ARTIFACTS_USERNAME }}
-          ${{ env.AZURE_ARTIFACTS_FEED_URL }}:_password=${{ secrets.AZURE_ARTIFACTS_BASE64_PAT }}
-          ${{ env.AZURE_ARTIFACTS_FEED_URL }}:email=npm requires email to be set but doesn't use the value
-          ; end auth token" > /home/runner/work/_temp/.yarnrc
-      - run: yarn
-      - run: yarn publish
