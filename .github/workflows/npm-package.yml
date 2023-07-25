@@ -24,7 +24,7 @@ jobs:
           
       - name: Replace with appropriate .npmrc
         run: |
-          echo "registry=${{ env.AZURE_ARTIFACTS_FEED_URL }}
+          echo "registry=https://${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/
           always-auth=true
           ; begin auth token
           ${{ env.AZURE_ARTIFACTS_FEED_URL }}registry/:username=${{ env.AZURE_ARTIFACTS_USERNAME }}
