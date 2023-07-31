@@ -9,18 +9,18 @@ Wraps TXTextControl Callback API to work with Objects and Promises.
 ## Usage
 
 - Create a TextControlContext to work with wrapped objects
-    ```
+    ```javascript
     let txContext = new TextControlContext();
     ...
     ```
 - Wrapped collections are supporting async iterators
-    ```
+    ```javascript
     for await (let field of this.txContext.applicationFields) {
         ...
     }  
     ```
 - Wrap a native TextControl object by passing it to constructor
-    ```
+    ```javascript
     let table = new Table(txTableObject);
     ```
 
