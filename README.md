@@ -21,7 +21,7 @@ Wraps TXTextControl Callback API to work with Objects and Promises.
     ```
 - Wrap a native TextControl object by passing it to constructor
     ```
-    let  table = new Table(txTableObject);
+    let table = new Table(txTableObject);
     ```
 
 ## Contributing
