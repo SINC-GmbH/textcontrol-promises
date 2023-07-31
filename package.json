@@ -12,7 +12,7 @@
     "typescript": "^5.0.4"
   },
   "author": "Björn Nast",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "description": "Wraps TXTextControl Callback API to work with Objects and Promises.",
   "publishConfig": {
     "@sinc-gmbh:registry": "https://npm.pkg.github.com"
