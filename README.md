@@ -24,7 +24,7 @@ Wraps TXTextControl Callback API to work with Objects and Promises.
     let  table = new Table(txTableObject);
     ```
 
-##Contributing
+## Contributing
 
 TBD
 
