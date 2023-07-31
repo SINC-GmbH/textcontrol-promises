@@ -3,8 +3,11 @@ Build up on [TXTextControl](https://www.textcontrol.com/) v31.3.0. (not fully su
 ## Description
 Wraps TXTextControl Callback API to work with Objects and Promises.
 
+It also includes typescript definitions for its classes.
+Therefore it can easy be used in typescript projects.
+
 ## Installation
-` npm install @sinc-gmbh/textcontrol-promises `
+`yarn install @sinc-gmbh/textcontrol-promises `
 
 ## Usage
 
