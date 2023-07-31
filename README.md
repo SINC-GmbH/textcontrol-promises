@@ -24,10 +24,6 @@ Wraps TXTextControl Callback API to work with Objects and Promises.
     let table = new Table(txTableObject);
     ```
 
-## Contributing
-
-TBD
-
 ## License
 
 Copyright (c) 2023 SINC GmbH. All rights reserved.
