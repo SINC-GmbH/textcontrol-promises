@@ -1,22 +1,22 @@
-declare module '@sinc/textcontrol-promises/index' {
-  export { ApplicationField } from "@sinc/textcontrol-promises/src/ApplicationField";
-  export { ApplicationFieldCollection } from "@sinc/textcontrol-promises/src/ApplicationFieldCollection";
-  export { Collection } from "@sinc/textcontrol-promises/src/Collection";
-  export { EditableRegion } from "@sinc/textcontrol-promises/src/EditableRegion";
-  export { FormField } from "@sinc/textcontrol-promises/src/FormField";
-  export { FormFieldCollection } from "@sinc/textcontrol-promises/src/FormFieldCollection";
-  export { MergeField } from "@sinc/textcontrol-promises/src/MergeField";
-  export { ParagraphFormat } from "@sinc/textcontrol-promises/src/ParagraphFormat";
-  export { Selection } from "@sinc/textcontrol-promises/src/Selection";
-  export { SubTextPart } from "@sinc/textcontrol-promises/src/SubTextPart";
-  export { SubTextPartCollection } from "@sinc/textcontrol-promises/src/SubTextPartCollection";
-  export { Table } from "@sinc/textcontrol-promises/src/Table";
-  export { TableCell } from "@sinc/textcontrol-promises/src/TableCell";
-  export { TableCollection } from "@sinc/textcontrol-promises/src/TableCollection";
-  export { TextControlContext } from "@sinc/textcontrol-promises/src/TextControlContext";
+declare module '@sinc-gmbh/textcontrol-promises/index' {
+  export { ApplicationField } from "@sinc-gmbh/textcontrol-promises/src/ApplicationField";
+  export { ApplicationFieldCollection } from "@sinc-gmbh/textcontrol-promises/src/ApplicationFieldCollection";
+  export { Collection } from "@sinc-gmbh/textcontrol-promises/src/Collection";
+  export { EditableRegion } from "@sinc-gmbh/textcontrol-promises/src/EditableRegion";
+  export { FormField } from "@sinc-gmbh/textcontrol-promises/src/FormField";
+  export { FormFieldCollection } from "@sinc-gmbh/textcontrol-promises/src/FormFieldCollection";
+  export { MergeField } from "@sinc-gmbh/textcontrol-promises/src/MergeField";
+  export { ParagraphFormat } from "@sinc-gmbh/textcontrol-promises/src/ParagraphFormat";
+  export { Selection } from "@sinc-gmbh/textcontrol-promises/src/Selection";
+  export { SubTextPart } from "@sinc-gmbh/textcontrol-promises/src/SubTextPart";
+  export { SubTextPartCollection } from "@sinc-gmbh/textcontrol-promises/src/SubTextPartCollection";
+  export { Table } from "@sinc-gmbh/textcontrol-promises/src/Table";
+  export { TableCell } from "@sinc-gmbh/textcontrol-promises/src/TableCell";
+  export { TableCollection } from "@sinc-gmbh/textcontrol-promises/src/TableCollection";
+  export { TextControlContext } from "@sinc-gmbh/textcontrol-promises/src/TextControlContext";
 
 }
-declare module '@sinc/textcontrol-promises/src/ApplicationField' {
+declare module '@sinc-gmbh/textcontrol-promises/src/ApplicationField' {
   export class ApplicationField {
       constructor(txApplicationField: any);
       get txApplicationField(): any;
@@ -37,18 +37,18 @@ declare module '@sinc/textcontrol-promises/src/ApplicationField' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/ApplicationFieldCollection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/ApplicationFieldCollection' {
   export class ApplicationFieldCollection extends Collection<ApplicationField> {
       constructor(txApplicationFieldCollection: any);
       getItem(): Promise<ApplicationField>;
       remove(applicationField: ApplicationField, keepText: boolean): Promise<boolean>;
       #private;
   }
-  import { ApplicationField } from "@sinc/textcontrol-promises/src/ApplicationField";
-  import { Collection } from "@sinc/textcontrol-promises/src/Collection";
+  import { ApplicationField } from "@sinc-gmbh/textcontrol-promises/src/ApplicationField";
+  import { Collection } from "@sinc-gmbh/textcontrol-promises/src/Collection";
 
 }
-declare module '@sinc/textcontrol-promises/src/Collection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/Collection' {
   export class Collection<T> {
       constructor(txCollection: any, wrapItem: (txItem: T) => T);
       protected _txCollection: any;
@@ -60,7 +60,7 @@ declare module '@sinc/textcontrol-promises/src/Collection' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/EditableRegion' {
+declare module '@sinc-gmbh/textcontrol-promises/src/EditableRegion' {
   export class EditableRegion {
       constructor(txEditableRegion: any);
       get txEditableRegion(): any;
@@ -79,7 +79,7 @@ declare module '@sinc/textcontrol-promises/src/EditableRegion' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/EditableRegionCollection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/EditableRegionCollection' {
   export class EditableRegionCollection extends Collection<EditableRegion> {
       constructor(txEditableRegionCollection: any);
       remove(editableRegion: EditableRegion, selectedPart?: boolean | undefined): Promise<boolean>;
@@ -89,11 +89,11 @@ declare module '@sinc/textcontrol-promises/src/EditableRegionCollection' {
       }>;
       #private;
   }
-  import { EditableRegion } from "@sinc/textcontrol-promises/src/EditableRegion";
-  import { Collection } from "@sinc/textcontrol-promises/src/Collection";
+  import { EditableRegion } from "@sinc-gmbh/textcontrol-promises/src/EditableRegion";
+  import { Collection } from "@sinc-gmbh/textcontrol-promises/src/Collection";
 
 }
-declare module '@sinc/textcontrol-promises/src/FormField' {
+declare module '@sinc-gmbh/textcontrol-promises/src/FormField' {
   export class FormField {
       constructor(txFormField: any);
       get txFormField(): any;
@@ -103,25 +103,25 @@ declare module '@sinc/textcontrol-promises/src/FormField' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/FormFieldCollection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/FormFieldCollection' {
   export class FormFieldCollection extends Collection<FormField> {
       constructor(txFormFieldCollection: any);
       getItem(id?: number | undefined): Promise<FormField>;
       remove(formField: FormField): Promise<boolean>;
       #private;
   }
-  import { FormField } from "@sinc/textcontrol-promises/src/FormField";
-  import { Collection } from "@sinc/textcontrol-promises/src/Collection";
+  import { FormField } from "@sinc-gmbh/textcontrol-promises/src/FormField";
+  import { Collection } from "@sinc-gmbh/textcontrol-promises/src/Collection";
 
 }
-declare module '@sinc/textcontrol-promises/src/helper/CallbackHelper' {
+declare module '@sinc-gmbh/textcontrol-promises/src/helper/CallbackHelper' {
   export class CallbackHelper {
       static tryGet(type: keyof typeof CallbackType | any, resolve: Function, reject: Function): any;
   }
-  import { CallbackType } from "@sinc/textcontrol-promises/src/helper/CallbackType";
+  import { CallbackType } from "@sinc-gmbh/textcontrol-promises/src/helper/CallbackType";
 
 }
-declare module '@sinc/textcontrol-promises/src/helper/CallbackType' {
+declare module '@sinc-gmbh/textcontrol-promises/src/helper/CallbackType' {
   export class CallbackType {
       static ErrorCallback: "ErrorCallback";
       static EmptyRequestCallback: "EmptyRequestCallback";
@@ -142,24 +142,24 @@ declare module '@sinc/textcontrol-promises/src/helper/CallbackType' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/helper/module' {
-  export { CallbackType } from "@sinc/textcontrol-promises/src/helper/CallbackType";
-  export { CallbackHelper } from "@sinc/textcontrol-promises/src/helper/CallbackHelper";
-  export { RequestHelper } from "@sinc/textcontrol-promises/src/helper/RequestHelper";
+declare module '@sinc-gmbh/textcontrol-promises/src/helper/module' {
+  export { CallbackType } from "@sinc-gmbh/textcontrol-promises/src/helper/CallbackType";
+  export { CallbackHelper } from "@sinc-gmbh/textcontrol-promises/src/helper/CallbackHelper";
+  export { RequestHelper } from "@sinc-gmbh/textcontrol-promises/src/helper/RequestHelper";
 
 }
-declare module '@sinc/textcontrol-promises/src/helper/RequestHelper' {
+declare module '@sinc-gmbh/textcontrol-promises/src/helper/RequestHelper' {
   export class RequestHelper {
       static Promise(request: Function, ...args: any[]): Promise<any>;
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/MergeField' {
+declare module '@sinc-gmbh/textcontrol-promises/src/MergeField' {
   export class MergeField {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/ParagraphFormat' {
+declare module '@sinc-gmbh/textcontrol-promises/src/ParagraphFormat' {
   export class ParagraphFormat {
       constructor(txParagraphFormat: any);
       get alignment(): any;
@@ -168,7 +168,7 @@ declare module '@sinc/textcontrol-promises/src/ParagraphFormat' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/Selection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/Selection' {
   export class Selection {
       constructor(txSelection: any);
       get start(): number | undefined;
@@ -180,10 +180,10 @@ declare module '@sinc/textcontrol-promises/src/Selection' {
       getLength(): Promise<number>;
       #private;
   }
-  import { ParagraphFormat } from "@sinc/textcontrol-promises/src/ParagraphFormat";
+  import { ParagraphFormat } from "@sinc-gmbh/textcontrol-promises/src/ParagraphFormat";
 
 }
-declare module '@sinc/textcontrol-promises/src/SubTextPart' {
+declare module '@sinc-gmbh/textcontrol-promises/src/SubTextPart' {
   export class SubTextPart {
       constructor(txSubTextPart: any);
       get data(): string | undefined;
@@ -196,7 +196,7 @@ declare module '@sinc/textcontrol-promises/src/SubTextPart' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/SubTextPartCollection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/SubTextPartCollection' {
   export class SubTextPartCollection {
       constructor(txSubTextPartCollection: any);
       add(name: string, id: number, start: number, length: number): Promise<{
@@ -206,10 +206,10 @@ declare module '@sinc/textcontrol-promises/src/SubTextPartCollection' {
       getItem(): Promise<SubTextPart>;
       #private;
   }
-  import { SubTextPart } from "@sinc/textcontrol-promises/src/SubTextPart";
+  import { SubTextPart } from "@sinc-gmbh/textcontrol-promises/src/SubTextPart";
 
 }
-declare module '@sinc/textcontrol-promises/src/Table' {
+declare module '@sinc-gmbh/textcontrol-promises/src/Table' {
   export class Table {
       constructor(txTable: any);
       get cells(): TableCellCollection;
@@ -217,10 +217,10 @@ declare module '@sinc/textcontrol-promises/src/Table' {
       selectCells(startRow: number, startColumn: number, stopRow: number, stopColumn: number): Promise<void>;
       #private;
   }
-  import { TableCellCollection } from "@sinc/textcontrol-promises/src/TableCellCollection";
+  import { TableCellCollection } from "@sinc-gmbh/textcontrol-promises/src/TableCellCollection";
 
 }
-declare module '@sinc/textcontrol-promises/src/TableCell' {
+declare module '@sinc-gmbh/textcontrol-promises/src/TableCell' {
   export class TableCell {
       constructor(txTableCell: any);
       get start(): number | undefined;
@@ -234,26 +234,26 @@ declare module '@sinc/textcontrol-promises/src/TableCell' {
   }
 
 }
-declare module '@sinc/textcontrol-promises/src/TableCellCollection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/TableCellCollection' {
   export class TableCellCollection {
       constructor(txTableCellCollection: any);
       getItem(row: number, column: number): Promise<TableCell>;
       #private;
   }
-  import { TableCell } from "@sinc/textcontrol-promises/src/TableCell";
+  import { TableCell } from "@sinc-gmbh/textcontrol-promises/src/TableCell";
 
 }
-declare module '@sinc/textcontrol-promises/src/TableCollection' {
+declare module '@sinc-gmbh/textcontrol-promises/src/TableCollection' {
   export class TableCollection {
       constructor(txTableCollection: any);
       add(rows: number, columns: number, id?: number | undefined): Promise<boolean>;
       getItem(id: number): Promise<Table>;
       #private;
   }
-  import { Table } from "@sinc/textcontrol-promises/src/Table";
+  import { Table } from "@sinc-gmbh/textcontrol-promises/src/Table";
 
 }
-declare module '@sinc/textcontrol-promises/src/TextControlContext' {
+declare module '@sinc-gmbh/textcontrol-promises/src/TextControlContext' {
   export class TextControlContext {
       get selection(): Selection;
       get tables(): TableCollection;
@@ -264,15 +264,15 @@ declare module '@sinc/textcontrol-promises/src/TextControlContext' {
       load(streamType: any, base64Data: string, loadSettings?: any | undefined): Promise<any>;
       save(streamType: any, saveSettings?: any | undefined): Promise<any>;
   }
-  import { Selection } from "@sinc/textcontrol-promises/src/Selection";
-  import { TableCollection } from "@sinc/textcontrol-promises/src/TableCollection";
-  import { SubTextPartCollection } from "@sinc/textcontrol-promises/src/SubTextPartCollection";
-  import { ApplicationFieldCollection } from "@sinc/textcontrol-promises/src/ApplicationFieldCollection";
-  import { FormFieldCollection } from "@sinc/textcontrol-promises/src/FormFieldCollection";
-  import { EditableRegionCollection } from "@sinc/textcontrol-promises/src/EditableRegionCollection";
+  import { Selection } from "@sinc-gmbh/textcontrol-promises/src/Selection";
+  import { TableCollection } from "@sinc-gmbh/textcontrol-promises/src/TableCollection";
+  import { SubTextPartCollection } from "@sinc-gmbh/textcontrol-promises/src/SubTextPartCollection";
+  import { ApplicationFieldCollection } from "@sinc-gmbh/textcontrol-promises/src/ApplicationFieldCollection";
+  import { FormFieldCollection } from "@sinc-gmbh/textcontrol-promises/src/FormFieldCollection";
+  import { EditableRegionCollection } from "@sinc-gmbh/textcontrol-promises/src/EditableRegionCollection";
 
 }
-declare module '@sinc/textcontrol-promises' {
-  import main = require('@sinc/textcontrol-promises/index');
+declare module '@sinc-gmbh/textcontrol-promises' {
+  import main = require('@sinc-gmbh/textcontrol-promises/index');
   export = main;
 }
