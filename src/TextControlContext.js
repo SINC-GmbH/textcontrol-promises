@@ -5,6 +5,7 @@ import { CallbackType, RequestHelper } from "./helper/module";
 import { ApplicationFieldCollection } from "./ApplicationFieldCollection";
 import { FormFieldCollection } from "./FormFieldCollection";
 import { EditableRegionCollection } from "./EditableRegionCollection";
+import { InputPosition } from "./InputPosition";
 
 export class TextControlContext {
     /** @type {Selection} */
@@ -30,6 +31,10 @@ export class TextControlContext {
     /** @type {EditableRegionCollection} */
     // @ts-ignore
     get editableRegions() { return new EditableRegionCollection(TXTextControl.editableRegions); }
+ 
+    /** @type {InputPosition} */
+    // @ts-ignore
+    get inputPosition() { return new InputPosition(TXTextControl.inputPosition); }
 
     //#region functions
     /**
@@ -61,6 +66,21 @@ export class TextControlContext {
             streamType,
             CallbackType.SaveDocumentResultCallback,
             saveSettings,
+            CallbackType.ErrorCallback);
+    }
+
+    /**
+     * Sets a new input position from a text position.
+     * @param {number} textPosition
+     * @param {any} textFieldPosition: TextFieldPosition
+     * @returns {Promise<void>}
+     */
+    async setInputPositionByTextPosition(textPosition, textFieldPosition){
+         // @ts-ignore
+        return RequestHelper.Promise(TXTextControl.setInputPositionByTextPosition,
+            textPosition, 
+            textFieldPosition, 
+            CallbackType.EmptyRequestCallback, 
             CallbackType.ErrorCallback);
     }
     //#endregion
