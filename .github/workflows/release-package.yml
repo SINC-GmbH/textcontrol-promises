@@ -16,7 +16,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sinc-gmbh'
       - run: yarn install --frozen-lockfile
-      - run: npm-dts generate
+      - run: yarn run dts
       - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,7 +33,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
       - run: yarn install --frozen-lockfile
-      - run: npm-dts generate
+      - run: yarn run dts
       - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

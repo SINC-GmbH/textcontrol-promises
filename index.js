@@ -13,3 +13,4 @@ export { Table } from './src/Table';
 export { TableCell } from './src/TableCell';
 export { TableCollection } from './src/TableCollection';
 export { TextControlContext } from './src/TextControlContext';
+export { InputPosition } from './src/InputPosition';
