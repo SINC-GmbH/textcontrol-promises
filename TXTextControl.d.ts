@@ -1,4 +1,4 @@
-export namespace TXTextControl {
+declare namespace TXTextControl {
   export enum StreamType {
     HTMLFormat,
     RichTextFormat,
@@ -144,7 +144,7 @@ export namespace TXTextControl {
   }
 
   export class MergeField {
-    dateTimeFormat: string;
+    dateTimeFormat: string | null;
     name: string;
     numericFormat: string | null;
     preserveFormatting: boolean;
@@ -270,7 +270,7 @@ export namespace TXTextControl {
   export interface EditableRegionEventArgs {
     id: number;
     length: number;
-    start: nmber;
+    start: number;
     userName: string;
   }
 
@@ -794,4 +794,35 @@ export namespace TXTextControl {
     callback?: EmptyRequestCallback,
     errorCallback?: ErrorCallback
   );
+
+  export enum TextFieldPosition {
+    InsideTextField,
+    OutsideTextField,
+    InsideNextTextField,
+  }
+
+  export function setInputPositionByTextPosition(
+    textPosition: number,
+    textFieldPosition: TextFieldPosition,
+    callback?: EmptyRequestCallback,
+    errorCallback?: ErrorCallback
+  );
+
+  export let inputPosition: InputPosition;
+  export interface InputPosition {
+    scrollTo(
+      scrollPosition: InputPosition.ScrollPosition,
+      callback: EmptyRequestCallback,
+      errorCallback?: ErrorCallback
+    );
+  }
+  export namespace InputPosition {
+    enum ScrollPosition {
+      Auto,
+      Left,
+      Right,
+      Top,
+      Bottom,
+    }
+  }
 }
