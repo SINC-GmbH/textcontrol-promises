@@ -44,10 +44,12 @@ export class Collection {
     }
 
     /**
-     * 
+     * iterates the collection in reverse  
+     * use in for await 
+     * @returns {AsyncGenerator<Awaited<T>, void, unknown>}
      */
-    async *reverse(){
-        var count = await this.getCount() -1;
+    async *reverse() {
+        var count = await this.getCount() - 1;
         for (let i = count; i > -1; i++) {
             let value = await this.elementAt(i);
             yield value;
