@@ -44,6 +44,17 @@ export class Collection {
     }
 
     /**
+     * 
+     */
+    async *reverse(){
+        var count = await this.getCount() -1;
+        for (let i = count; i > -1; i++) {
+            let value = await this.elementAt(i);
+            yield value;
+        }
+    }
+
+    /**
      * Executes a callback function for each element
      * @public
      * @param {( item: T, index: number, itemCount: number ) => void} forEachCallback 
