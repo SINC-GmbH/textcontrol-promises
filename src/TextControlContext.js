@@ -95,13 +95,14 @@ export class TextControlContext {
     /**
      * Initializes the document editor
      * @param {TXTextControl.ComponentSettings} componentSettings
+     * @param {string} [jsResourceFilePath="/GetResource?name=tx-document-editor.min.js"] 
      * @returns {Promise<void>}
      */
-    async init(componentSettings) {
+    async init(componentSettings, jsResourceFilePath="/GetResource?name=tx-document-editor.min.js") {
         return new Promise(async (resolve, reject) => {
             if (this.#isTextControlLoaded) resolve();
 
-            let txDocumentEditorResourceUrl = new URL("/GetResource?name=tx-document-editor.min.js", componentSettings.webSocketURL);
+            let txDocumentEditorResourceUrl = new URL(jsResourceFilePath, componentSettings.webSocketURL);
 
             //load tx resource and await global object to be defined
             var script = document.createElement('script');
