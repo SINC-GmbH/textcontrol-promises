@@ -171,24 +171,24 @@ declare namespace TXTextControl {
     bytesWritten: number;
   }
   export interface SaveSettings {
-    author: string;
-    creationDate: number;
-    creatorApplication: string;
-    cssSaveMode: SaveSettings.CssSaveMode;
-    documentAccessPermissions: DocumentAccessPermissions;
-    documentKeywords: Array<string>;
-    documentLevelJavaScriptActions: string;
-    documentSubject: string;
-    documentTitle: string;
-    imageCompressionQuality: number;
-    imageExportFilterIndex: number;
-    imageMaxResolution: number;
-    lastModificationDate: number;
-    masterPassword: string;
-    omittedContent: SaveSettings.OmittedContent;
-    reportingMergeBlockFormat: SaveSettings.ReportingMergeBlockFormat;
-    saveDocumentBackColor: boolean;
-    userPassword: string;
+    author?: string;
+    creationDate?: number;
+    creatorApplication?: string;
+    cssSaveMode?: SaveSettings.CssSaveMode;
+    documentAccessPermissions?: DocumentAccessPermissions;
+    documentKeywords?: Array<string>;
+    documentLevelJavaScriptActions?: string;
+    documentSubject?: string;
+    documentTitle?: string;
+    imageCompressionQuality?: number;
+    imageExportFilterIndex?: number;
+    imageMaxResolution?: number;
+    lastModificationDate?: number;
+    masterPassword?: string;
+    omittedContent?: SaveSettings.OmittedContent;
+    reportingMergeBlockFormat?: SaveSettings.ReportingMergeBlockFormat;
+    saveDocumentBackColor?: boolean;
+    userPassword?: string;
   }
 
   export type SaveDocumentResultCallback = (args: SaveDocumentResult) => void;
@@ -287,7 +287,6 @@ declare namespace TXTextControl {
 
   export interface EventMap {
     changed: EventCallback;
-    textControlChanged: EventCallback;
     subTextPartEntered: SubTextPartCallback;
     subTextPartLeft: SubTextPartCallback;
     textFieldEntered: TextFieldCallback;
@@ -714,13 +713,7 @@ declare namespace TXTextControl {
     );
   }
 
-  export interface ApplicationField {
-    getName(callback: RequestStringCallback, errorCallback?: ErrorCallback);
-    setName(
-      name: string,
-      callback?: EmptyRequestCallback,
-      errorCallback?: ErrorCallback
-    );
+  export interface ApplicationField extends TextField {
     getTypeName(callback: RequestStringCallback, errorCallback?: ErrorCallback);
     getParameters(
       callback: RequestStringsCallback,
@@ -731,23 +724,13 @@ declare namespace TXTextControl {
       callback?: EmptyRequestCallback,
       errorCallback?: ErrorCallback
     );
-    getText(callback: RequestStringCallback, errorCallback?: ErrorCallback);
-    setText(
-      text: string,
-      callback?: EmptyRequestCallback,
-      errorCallback?: ErrorCallback
-    );
-    getStart: (
-      callback: RequestNumberCallback,
-      errorCallback?: ErrorCallback
-    ) => void;
   }
 
-  export interface FormField extends TextField {}
-  export interface CheckFormField extends FormField {}
-  export interface DateFormField extends FormField {}
-  export interface SelectionFormField extends FormField {}
-  export interface TextFormField extends FormField {}
+  export interface FormField extends TextField { }
+  export interface CheckFormField extends FormField { }
+  export interface DateFormField extends FormField { }
+  export interface SelectionFormField extends FormField { }
+  export interface TextFormField extends FormField { }
 
   export let textFields: TextFieldCollection;
 
@@ -763,21 +746,14 @@ declare namespace TXTextControl {
 
   export interface TextField {
     getName(callback: RequestStringCallback, errorCallback?: ErrorCallback);
-    setName(
-      name: string,
-      callback?: EmptyRequestCallback,
-      errorCallback?: ErrorCallback
-    );
+    setName(name: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback);
     getText(callback: RequestStringCallback, errorCallback?: ErrorCallback);
-    setText(
-      text: string,
-      callback?: EmptyRequestCallback,
-      errorCallback?: ErrorCallback
-    );
-    getStart: (
-      callback: RequestNumberCallback,
-      errorCallback?: ErrorCallback
-    ) => void;
+    setText(text: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback);
+    getStart(callback: RequestNumberCallback, errorCallback?: ErrorCallback);
+    getDeleteable(callback: RequestBooleanCallback, errorCallback?: ErrorCallback);
+    setDeleteable(deleteable: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback);
+    getEditable(callback: RequestBooleanCallback, errorCallback?: ErrorCallback);
+    setEditable(editable: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback);
   }
 
   export function removeFromDom(): void;
@@ -824,5 +800,38 @@ declare namespace TXTextControl {
       Top,
       Bottom,
     }
+  }
+
+  export function init(settings: ComponentSettings);
+  export interface ComponentSettings {
+    containerID: string;
+    webSocketURL: string;
+    editorSettings?: DocumentEditorSettings;
+    replaceContainer?: boolean;
+    /**is fired as soon as the document editor scaffolding has been inserted into the DOM*/
+    domContentLoaded?: Function;
+  }
+  export interface DocumentEditorSettings {
+    connectionID?: number;
+    culture?: string;
+    uiCulture?: string;
+    editMode?: EditMode;
+    contextMenusEnabled?: boolean;
+    formattingPrinter?: string;
+    reconnectTimeout?: number;
+    userNames?: string[];
+    customQueryParams?: object;
+  }
+
+  export function setRenderMode(
+    value: ComponentRenderMode,
+    callback?: EmptyRequestCallback,
+    errorCallback?: ErrorCallback
+  );
+
+  export enum ComponentRenderMode {
+    Bitmap,
+    Vector,
+    Auto
   }
 }
