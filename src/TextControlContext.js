@@ -6,8 +6,15 @@ import { ApplicationFieldCollection } from "./ApplicationFieldCollection";
 import { FormFieldCollection } from "./FormFieldCollection";
 import { EditableRegionCollection } from "./EditableRegionCollection";
 import { InputPosition } from "./InputPosition";
+import { timeout } from "./helper/module";
 
 export class TextControlContext {
+    /**
+     * indicates if TXTextControl is ready
+     * @type {boolean}
+     */
+    #isTextControlLoaded = false;
+
     /** @type {Selection} */
     // @ts-ignore
     get selection() { return new Selection(TXTextControl.selection); }
@@ -31,7 +38,7 @@ export class TextControlContext {
     /** @type {EditableRegionCollection} */
     // @ts-ignore
     get editableRegions() { return new EditableRegionCollection(TXTextControl.editableRegions); }
- 
+
     /** @type {InputPosition} */
     // @ts-ignore
     get inputPosition() { return new InputPosition(TXTextControl.inputPosition); }
@@ -75,13 +82,73 @@ export class TextControlContext {
      * @param {any} textFieldPosition: TextFieldPosition
      * @returns {Promise<void>}
      */
-    async setInputPositionByTextPosition(textPosition, textFieldPosition){
-         // @ts-ignore
+    async setInputPositionByTextPosition(textPosition, textFieldPosition) {
+        // @ts-ignore
         return RequestHelper.Promise(TXTextControl.setInputPositionByTextPosition,
-            textPosition, 
-            textFieldPosition, 
-            CallbackType.EmptyRequestCallback, 
+            textPosition,
+            textFieldPosition,
+            CallbackType.EmptyRequestCallback,
             CallbackType.ErrorCallback);
+    }
+
+    /**
+     * Sets the component render mode.
+     * @param {any} value: ComponentRenderMode
+     */
+    async setRenderMode(value) {
+        // @ts-ignore
+        return RequestHelper.Promise(TXTextControl.setRenderMode,
+            value,
+            CallbackType.EmptyRequestCallback,
+            CallbackType.ErrorCallback);
+    }
+
+    /**
+     * Initializes the document editor
+     * @param {{webSocketURL: string;}} componentSettings
+     * @returns {Promise<void>}
+     */
+    async init(componentSettings) {
+        return new Promise(async (resolve, reject) => {
+            if (this.#isTextControlLoaded) resolve();
+
+            let txDocumentEditorResourceUrl = new URL("/GetResource?name=tx-document-editor.min.js", componentSettings.webSocketURL);
+
+            //load tx resource and await global object to be defined
+            var script = document.createElement('script');
+            script.setAttribute('src', txDocumentEditorResourceUrl.href);
+            document.head.appendChild(script);
+            await this.#txTextControlNotUndefined();
+            //init document editor
+            // @ts-ignore
+            TXTextControl.addEventListener('textControlLoaded', () => {
+                this.#isTextControlLoaded = true;
+                resolve();
+            });
+            // @ts-ignore
+            TXTextControl.init(componentSettings);
+        });
+    }
+
+    /**
+     * waits until TXTextControlLoaded
+     * @returns {Promise<void>}
+     */
+    async isReady() {
+        return new Promise(async (resolve, reject) => {
+            while (this.#isTextControlLoaded == false) {
+                await timeout(500);
+            }
+            resolve();
+        });
+    }
+    //#endregion
+
+    //#region private functions
+    async #txTextControlNotUndefined() {
+        while (!("TXTextControl" in window)) {
+            await timeout(500);
+        }
     }
     //#endregion
 }
