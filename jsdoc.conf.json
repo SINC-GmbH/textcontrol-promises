@@ -22,7 +22,7 @@
         "monospaceLinks": false
     },
     "opts": {
-        "destination": "./doc/",
+        "destination": "./docs/",
         "template": "node_modules/better-docs"
     }
 }
