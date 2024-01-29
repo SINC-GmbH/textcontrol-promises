@@ -1,12 +1,11 @@
 import { SubTextPartCollection } from "./SubTextPartCollection";
 import { Selection } from "./Selection";
 import { TableCollection } from "./TableCollection";
-import { CallbackType, RequestHelper } from "./helper/module";
+import { CallbackType, RequestHelper, waitUntil } from "./helper/module";
 import { ApplicationFieldCollection } from "./ApplicationFieldCollection";
 import { FormFieldCollection } from "./FormFieldCollection";
 import { EditableRegionCollection } from "./EditableRegionCollection";
 import { InputPosition } from "./InputPosition";
-import { timeout } from "./helper/module";
 
 /** @class */
 export class TextControlContext {
@@ -123,20 +122,13 @@ export class TextControlContext {
      * @returns {Promise<void>}
      */
     async isReady() {
-        return new Promise(async (resolve, reject) => {
-            while (this.#isTextControlLoaded == false) {
-                await timeout(500);
-            }
-            resolve();
-        });
+        return waitUntil(() => this.#isTextControlLoaded, 20);
     }
     //#endregion
 
     //#region private functions
     async #txTextControlNotUndefined() {
-        while (!("TXTextControl" in window)) {
-            await timeout(500);
-        }
+        return waitUntil(() => "TXTextControl" in window, 20);
     }
     //#endregion
 }
