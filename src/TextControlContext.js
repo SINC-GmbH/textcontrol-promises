@@ -16,31 +16,24 @@ export class TextControlContext {
     #isTextControlLoaded = false;
 
     /** @type {Selection} */
-    // @ts-ignore
     get selection() { return new Selection(TXTextControl.selection); }
 
     /** @type {TableCollection} */
-    // @ts-ignore
     get tables() { return new TableCollection(TXTextControl.tables); }
 
     /** @type {SubTextPartCollection} */
-    // @ts-ignore
     get subTextParts() { return new SubTextPartCollection(TXTextControl.subTextParts); }
 
     /** @type {ApplicationFieldCollection} */
-    // @ts-ignore
     get applicationFields() { return new ApplicationFieldCollection(TXTextControl.applicationFields); }
 
     /** @type {FormFieldCollection} */
-    // @ts-ignore
     get formFields() { return new FormFieldCollection(TXTextControl.formFields); }
 
     /** @type {EditableRegionCollection} */
-    // @ts-ignore
     get editableRegions() { return new EditableRegionCollection(TXTextControl.editableRegions); }
 
     /** @type {InputPosition} */
-    // @ts-ignore
     get inputPosition() { return new InputPosition(TXTextControl.inputPosition); }
 
     //#region functions
@@ -52,7 +45,6 @@ export class TextControlContext {
      * @returns {Promise<any>} LoadDocumentCallbackData
      */
     async load(streamType, base64Data, loadSettings) {
-        // @ts-ignore
         return RequestHelper.Promise(TXTextControl.load,
             streamType,
             base64Data,
@@ -68,7 +60,6 @@ export class TextControlContext {
      * @returns {Promise<any>} SaveDocumentResult
      */
     async save(streamType, saveSettings) {
-        // @ts-ignore
         return RequestHelper.Promise(TXTextControl.save,
             streamType,
             CallbackType.SaveDocumentResultCallback,
@@ -83,7 +74,6 @@ export class TextControlContext {
      * @returns {Promise<void>}
      */
     async setInputPositionByTextPosition(textPosition, textFieldPosition) {
-        // @ts-ignore
         return RequestHelper.Promise(TXTextControl.setInputPositionByTextPosition,
             textPosition,
             textFieldPosition,
@@ -96,7 +86,6 @@ export class TextControlContext {
      * @param {any} value: ComponentRenderMode
      */
     async setRenderMode(value) {
-        // @ts-ignore
         return RequestHelper.Promise(TXTextControl.setRenderMode,
             value,
             CallbackType.EmptyRequestCallback,
@@ -105,7 +94,7 @@ export class TextControlContext {
 
     /**
      * Initializes the document editor
-     * @param {{webSocketURL: string;}} componentSettings
+     * @param {TXTextControl.ComponentSettings} componentSettings
      * @returns {Promise<void>}
      */
     async init(componentSettings) {
@@ -120,12 +109,10 @@ export class TextControlContext {
             document.head.appendChild(script);
             await this.#txTextControlNotUndefined();
             //init document editor
-            // @ts-ignore
             TXTextControl.addEventListener('textControlLoaded', () => {
                 this.#isTextControlLoaded = true;
                 resolve();
             });
-            // @ts-ignore
             TXTextControl.init(componentSettings);
         });
     }
