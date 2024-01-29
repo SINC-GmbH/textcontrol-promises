@@ -8,6 +8,7 @@ import { EditableRegionCollection } from "./EditableRegionCollection";
 import { InputPosition } from "./InputPosition";
 import { timeout } from "./helper/module";
 
+/** @class */
 export class TextControlContext {
     /**
      * indicates if TXTextControl is ready
@@ -83,7 +84,7 @@ export class TextControlContext {
 
     /**
      * Sets the component render mode.
-     * @param {any} value: ComponentRenderMode
+     * @param {TXTextControl.ComponentRenderMode} value
      */
     async setRenderMode(value) {
         return RequestHelper.Promise(TXTextControl.setRenderMode,
