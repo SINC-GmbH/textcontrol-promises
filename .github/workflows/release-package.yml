@@ -17,7 +17,7 @@ jobs:
           scope: '@sinc-gmbh'
       - run: yarn install --frozen-lockfile
       - run: yarn run dts
-      - run: yarn publish --access public
+      - run: yarn npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   npm:
@@ -34,6 +34,6 @@ jobs:
           scope: '@sinc-gmbh'
       - run: yarn install --frozen-lockfile
       - run: yarn run dts
-      - run: yarn publish --access public
+      - run: yarn npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
