@@ -8,7 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - run: yarn set version berry
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
     - run: yarn install
     - name: Build
       uses: andstor/jsdoc-action@v1
