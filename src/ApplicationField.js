@@ -7,6 +7,10 @@ export class ApplicationField {
 
     /** @type {string=} */
     #name;
+    /** 
+     *  @property name
+     *  @type {string=} 
+     */
     get name() { return this.#name; }
 
     /** @type {string=} */
@@ -52,6 +56,8 @@ export class ApplicationField {
 
     /**
      * Sets the name of a text field
+     * @public
+     * @method
      * @param {string} name
      * @returns {Promise<void>}
      */
@@ -65,6 +71,7 @@ export class ApplicationField {
 
     /**
      * Sets the field's parameters
+     * @public
      * @param {Array<string>} parameters
      * @returns {Promise<void>}
      */

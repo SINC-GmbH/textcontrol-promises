@@ -12,13 +12,13 @@ export class Collection {
     */
     _txCollection;
 
-    /** @type {(txItem:T)=>T} */
+    /** @type {function(T):T} */
     #wrapItem;
 
     /**
      * Wrapper für TXTextControl.Collection
      * @param {any} txCollection 
-     * @param {(txItem:T)=>T} wrapItem
+     * @param {function(T):T} wrapItem
      */
     constructor(txCollection, wrapItem) {
         this._txCollection = txCollection;
@@ -44,9 +44,22 @@ export class Collection {
     }
 
     /**
+     * iterates the collection in reverse  
+     * use in for await 
+     * @returns {AsyncGenerator<Awaited<T>, void, unknown>}
+     */
+    async *reverse() {
+        var count = await this.getCount() - 1;
+        for (let i = count; i > -1; i++) {
+            let value = await this.elementAt(i);
+            yield value;
+        }
+    }
+
+    /**
      * Executes a callback function for each element
      * @public
-     * @param {( item: T, index: number, itemCount: number ) => void} forEachCallback 
+     * @param {function(T, number, number ):void} forEachCallback 
      * @returns {Promise<void>}
      * @deprecated may use "for await" instead forEachCallback
      */

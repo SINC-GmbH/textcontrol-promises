@@ -1,7 +1,10 @@
 {
-  "include": ["**/*.js"],
+  "include": [
+    "**/*.js",
+    "**/*.d.ts"
+  ],
   "compilerOptions": {
-    "module": "ES6",
+    "module": "NodeNext",
     "target": "ESNext",
     "moduleResolution": "nodenext",
     "strict": true,
@@ -10,6 +13,7 @@
     "emitDeclarationOnly": true,
     "allowJs": true,
     "checkJs": true,
-    "removeComments": true
+    "removeComments": true,
+    "types": []
   }
 }
