@@ -26,6 +26,8 @@ Therefore it can easy be used in typescript projects.
     ```javascript
     let table = new Table(txTableObject);
     ```
+## Documentation
+see [https://sinc-gmbh.github.io/textcontrol-promises](https://sinc-gmbh.github.io/textcontrol-promises)
 
 ## License
 
