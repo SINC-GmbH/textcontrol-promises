@@ -14,8 +14,12 @@ jobs:
       uses: andstor/jsdoc-action@v1
       with:
         config_file: ./jsdoc.conf.json
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        deploy_key: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
+        path: './docs'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
