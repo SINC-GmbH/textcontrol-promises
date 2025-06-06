@@ -98,7 +98,7 @@ export class TextControlContext {
      * @param {string} [jsResourceFilePath="/GetResource?name=tx-document-editor.min.js"] 
      * @returns {Promise<void>}
      */
-    async init(componentSettings, jsResourceFilePath="/GetResource?name=tx-document-editor.min.js") {
+    async init(componentSettings, jsResourceFilePath = "/GetResource?name=tx-document-editor.min.js") {
         return new Promise(async (resolve, reject) => {
             if (this.#isTextControlLoaded) resolve();
 
