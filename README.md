@@ -1,5 +1,5 @@
 # textcontrol-promises
-Build up on [TXTextControl](https://www.textcontrol.com/) v31.3.0. (not fully supported yet).
+Build up on [TXTextControl](https://www.textcontrol.com/) v33.0.0.
 ## Description
 Wraps TXTextControl Callback API to work with Objects and Promises.
 
@@ -11,10 +11,40 @@ Therefore it can easy be used in typescript projects.
 
 ## Usage
 
-- Create a TextControlContext to work with wrapped objects
+1. make TXTextControl global object known to access enums and other instances.  
+   I created a "./types/global.d.ts" in my demo project like this:
+
+    ``` javascript
+    import {TXTextControlTypeDefinition} from "@sinc-gmbh/textcontrol-promises";
+    declare global{
+        var TXTextControl: typeof TXTextControlTypeDefinition;
+    }
+    ```
+2. For using the TypeDefinition with JSDoc in a js file you can import the type definition with an alias
+    ``` javascript
+    /** @import {TXTextControlTypeDefinition as TXTextControl} from "@sinc-gmbh/textcontrol-promises" */
+    ```
+
+## Code Examples
+
+- Create a TextControlContext to work with wrapped objects and initialize TextControl editor.
     ```javascript
     let txContext = new TextControlContext();
     ...
+    const componentSetting = {
+        containerID: "editor",
+        webSocketURL: websocketUrl,
+        editorSettings: {
+        culture: "de-DE",
+        uiCulture: "de-DE",
+        },
+        replaceContainer: true,
+    };
+    // resource url needs to point at /GetResource?name=tx-document-editor.min.js
+    await txContext.initialize(componentSetting,resourceUrl);
+    ...
+    //waits until TextControlLoaded was fired
+    await txContext.untilTextControlLoaded();
     ```
 - Wrapped collections are supporting async iterators
     ```javascript

@@ -1,0 +1,28 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*]
+charset = utf-8-bom # with default encoding ## Use of utf-8-bom is discouraged -> https://github.com/editorconfig/editorconfig/issues/297
+max_line_length = 150
+
+# Indentation and spacing
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+# New line preferences
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+quote_type = single
+
+# JSON files
+[*.json]
+indent_size = 2
+
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false

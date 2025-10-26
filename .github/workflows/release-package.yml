@@ -18,9 +18,9 @@ jobs:
           cache: 'yarn'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sinc-gmbh'
-      - run: yarn install --frozen-lockfile
-      - run: yarn run dts
-      - run: yarn npm publish --access public
+      - run: yarn --cwd lib install --frozen-lockfile
+      - run: yarn --cwd lib run build
+      - run: yarn --cwd lib npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   npm:
@@ -35,8 +35,8 @@ jobs:
           node-version: '21.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
-      - run: yarn install --frozen-lockfile
-      - run: yarn run dts
-      - run: yarn npm publish --access public
+      - run: yarn --cwd lib install --frozen-lockfile
+      - run: yarn --cwd lib run dts
+      - run: yarn --cwd lib npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

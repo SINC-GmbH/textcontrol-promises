@@ -1,0 +1,14 @@
+{
+  "name": "@sinc-gmbh/textcontrol-promises-demo",
+  "version": "0.0.1",
+  "scripts": {
+    "demo": "npx live-server"
+  },
+  "devDependencies": {
+    "@sinc-gmbh/textcontrol-promises": "link:../lib",
+    "live-server": "^1.2.2"
+  },
+  "author": "Björn Nast",
+  "description": "Demo App for TextControl Promises",
+  "packageManager": "yarn@4.10.3"
+}

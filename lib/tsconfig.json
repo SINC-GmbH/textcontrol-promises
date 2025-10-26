@@ -1,0 +1,19 @@
+{
+  "include": [
+    "**/*.js",
+    "./types/global.d.ts",
+  ],
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ESNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowJs": true,
+    "checkJs": true,
+    "removeComments": true,
+    "outDir": "dist",
+  }
+}
