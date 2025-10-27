@@ -145,3 +145,6 @@ export * from "./TextViewLocationChangedCallback";
 export * from "./TrackedChangeCallback";
 export * from "./WebSocketClosedCallback";
 export * from "./ZoomFactorChangedCallback";
+export * from "./GetUSerDictionaryInfoCallback";
+export * from "./GetDictionaryListCallback";
+export * from "./SaveUserDictionaryCallback";

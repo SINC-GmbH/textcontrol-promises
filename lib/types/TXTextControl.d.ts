@@ -102,6 +102,7 @@ import {
     ParagraphFormat,
     SubTextPartCollection,
     TableCollection,
+    Selection
 } from './objects';
 
 //#region methods

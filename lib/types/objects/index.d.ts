@@ -77,6 +77,7 @@ export * from "./ParagraphFormat";
 export * from "./ParagraphStyle";
 export * from "./ParagraphStyleCollection";
 export * from "./Point";
+export * as Proofing from "./Proofing"
 export * from "./Rectangle";
 export * from "./Ribbon";
 export * from "./RibbonPermissionsTab";
@@ -135,3 +136,5 @@ export * from "./TextViewGeneratorColors";
 export * from "./TrackedChange";
 export * from "./TrackedChangeCollection";
 export * from "./TrackedChangeInfo";
+export * from "./UserDictionaryInfo";
+export * from "./DictionaryInfo";
