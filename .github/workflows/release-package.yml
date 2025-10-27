@@ -41,6 +41,9 @@ jobs:
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
+      - name: copy readme
+        run: |
+          cp README.md lib/README.md
       - name: Build Package
         run: |
           yarn install --immutable
