@@ -15,9 +15,12 @@ jobs:
     - uses: actions/setup-node@v6.0.0
       with:
         node-version: '24.x'
-    - run: cd lib
-    - run: yarn install
-    - run: yarn run jsdocumentation
+    - name: install dependencies
+      run: yarn install
+      working-directory: lib
+    - name: build documentation
+      run: yarn run jsdocumentation
+      working-directory: lib
     - name: Setup Pages
       uses: actions/configure-pages@v5.0.0
     - name: Upload artifact
