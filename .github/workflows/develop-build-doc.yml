@@ -15,11 +15,13 @@ jobs:
     - uses: actions/setup-node@v6.0.0
       with:
         node-version: '24.x'
-    - name: install dependencies
-      run: yarn install
-      working-directory: lib
+    - name: copy readme
+      run: |
+        cp README.md lib/README.md
     - name: build documentation
-      run: yarn run jsdocumentation
+      run: |
+        yarn install
+        yarn run jsdocumentation
       working-directory: lib
     - name: Setup Pages
       uses: actions/configure-pages@v5.0.0
