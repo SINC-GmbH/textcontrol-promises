@@ -3,6 +3,9 @@
     "**/*.js",
     "./types/global.d.ts",
   ],
+  "exclude": [
+    "./docs/**"
+  ],
   "compilerOptions": {
     "module": "NodeNext",
     "target": "ESNext",

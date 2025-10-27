@@ -49,6 +49,8 @@ import {
     ZoomFactorChangedCallback,
 } from '../callbacks';
 
+export type EventMapNames = keyof EventMap;
+export type EventMapCallback<T extends EventMapNames> = EventMap[T];
 export interface EventMap {
     /**	Is fired when a new barcode has been created.*/
     barcodeCreated: BarcodeCallback;
