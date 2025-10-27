@@ -10,17 +10,23 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           always-auth: true
-          node-version: '20.x'
+          node-version: '24.x'
           cache: 'yarn'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sinc-gmbh'
-      - run: yarn --cwd lib install --frozen-lockfile
-      - run: yarn --cwd lib run build
-      - run: yarn --cwd lib npm publish --access public
+      - name: Yarn Install
+        run: yarn install --frozen-lockfile
+        working-directory: lib
+      - name: Build Package
+        run: yarn run build
+        working-directory: lib
+      - name: publisch Package to Github
+        run: yarn npm publish --access public
+        working-directory: lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   npm:
@@ -29,14 +35,20 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version: '21.x'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
-      - run: yarn --cwd lib install --frozen-lockfile
-      - run: yarn --cwd lib run dts
-      - run: yarn --cwd lib npm publish --access public
+      - name: Yarn Install
+        run: yarn install --frozen-lockfile
+        working-directory: lib
+      - name: Build Package
+        run: yarn run build
+        working-directory: lib
+      - name: publisch Package to Github
+        run: yarn npm publish --access public
+        working-directory: lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
