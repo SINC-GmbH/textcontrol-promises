@@ -17,20 +17,16 @@ jobs:
           node-version: '24.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sinc-gmbh'
-      - name: Yarn Install
-        run: yarn install --immutable
-        working-directory: lib
       - name: Build Package
-        run: yarn run build
-        working-directory: lib
-      - run: yarn config set npmRegistryServer 'https://npm.pkg.github.com'
-        working-directory: lib
-      - run: yarn config set npmAuthToken ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          yarn install --immutable
+          yarn run build
         working-directory: lib
       - name: publisch Package to Github
-        run: yarn npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          yarn config set npmRegistryServer 'https://npm.pkg.github.com'
+          yarn config set npmAuthToken ${{ secrets.GITHUB_TOKEN }}
+          yarn npm publish --access public
         working-directory: lib
   npm:
     runs-on: ubuntu-latest
@@ -45,14 +41,14 @@ jobs:
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
-      - name: Yarn Install
-        run: yarn install --immutable
-        working-directory: lib
       - name: Build Package
-        run: yarn run build
+        run: |
+          yarn install --immutable
+          yarn run build
         working-directory: lib
       - name: publisch Package to Github
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          yarn config set npmRegistryServer 'https://registry.npmjs.org'
+          yarn config set npmAuthToken ${{ secrets.NPM_TOKEN  }}
+          yarn npm publish --access public
         working-directory: lib
