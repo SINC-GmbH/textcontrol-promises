@@ -1,6 +1,17 @@
 import { TextControlContext } from "./node_modules/@sinc-gmbh/textcontrol-promises/index.js";
 /** @import {TXTextControlTypeDefinition as TXTextControl} from "@sinc-gmbh/textcontrol-promises" */
 
+window.addTable = async function addTable(rows,columns,id) {
+  let txContext = new TextControlContext();
+   //Wrapper Example
+  let added = await txContext.tables.add(rows, columns, id);
+  if (added) {
+    let wrapperTable = await txContext.tables.getItem(id);
+    let wrapperId = await wrapperTable.getID();
+    console.log("Table with ID " + wrapperId + " added.");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   let resourceUrl =
     "https://tx.sinc-dev.de:44282/txwebsocket/GetResource?name=tx-document-editor.min.js";
@@ -30,13 +41,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   let rows = 3;
   let columns = 3;
   let id = 101;
-  //Wrapper Example
-  let added = await txContext.tables.add(rows, columns, id);
-  if (added) {
-    let wrapperTable = await txContext.tables.getItem(id);
-    let wrapperId = await wrapperTable.getID();
-    console.log("Table with ID " + wrapperId + " added.");
-  }
   
   //Plain TXTextControl Example
   /** @type {TXTextControl.Table} */
@@ -45,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       rows,
       columns,
       id,
-      (added = {
+      (added) => {
         if(added) {
           TXTextControl.tables.getItem(
             (table) => {
@@ -54,11 +58,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             null,
             id
           );
-        },
-      })
-    );
+        }
+      });
   });
   txTable.getID((id) => {
-    console.log("Table with ID " +  + " added via callback.");
+    console.log("Table with ID " + id + " added via callback.");
   })
 });
