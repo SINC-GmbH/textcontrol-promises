@@ -41,5 +41,13 @@ export interface TextFieldInfo {
     /** The text field's text content. */
     text: string;
     /** The field type ("APPLICATIONFIELD" or "TEXTFIELD"). */
-    type: 'APPLICATIONFIELD' | 'TEXTFIELD';
+    type:
+        | 'APPLICATIONFIELD'
+        | 'TEXTFIELD'
+        | 'TEXTFORMFIELD'
+        | 'CHECKFORMFIELD'
+        | 'SELECTIONFORMFIELD'
+        | 'DATEFORMFIELD'
+        | 'HYPERTEXTLINK'
+        | 'PAGENUMBERFIELD';
 }
