@@ -1,5 +1,5 @@
 # textcontrol-promises
-Build up on [TXTextControl](https://www.textcontrol.com/) v33.0.0.
+Build up on [TXTextControl](https://www.textcontrol.com/)
 ## Description
 Wraps TXTextControl Callback API to work with Objects and Promises.
 
