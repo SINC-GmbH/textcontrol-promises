@@ -31,13 +31,13 @@ jobs:
   npm:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Required for OIDC
       contents: read
+      id-token: write  # Required for OIDC
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
-          node-version: '24.x'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
       - name: copy readme
@@ -49,5 +49,5 @@ jobs:
           yarn run build
         working-directory: lib
       - name: publisch Package to Github
-        run: npm publish --access public
+        run: NODE_AUTH_TOKEN="" npm publish --access public --verbose
         working-directory: lib
