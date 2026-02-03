@@ -16,8 +16,5 @@
   "author": "Björn Nast",
   "license": "MIT",
   "description": "Wraps TXTextControl Callback API to work with Objects and Promises.",
-  "publishConfig": {
-    "@sinc-gmbh:registry": "https://npm.pkg.github.com"
-  },
   "packageManager": "yarn@4.12.0"
 }

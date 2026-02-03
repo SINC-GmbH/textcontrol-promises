@@ -49,5 +49,5 @@ jobs:
           yarn run build
         working-directory: lib
       - name: publisch Package to Github
-        run: NODE_AUTH_TOKEN="" npm publish --access public --verbose
+        run: NODE_AUTH_TOKEN="" npm publish --access public --verbose --@sinc-gmbh:registry=https://registry.npmjs.org
         working-directory: lib
