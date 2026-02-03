@@ -49,5 +49,5 @@ jobs:
           yarn run build
         working-directory: lib
       - name: publisch Package to Github
-        run: yarn npm publish
+        run: yarn npm publish --access public
         working-directory: lib
