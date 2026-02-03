@@ -10,5 +10,5 @@
   },
   "author": "Björn Nast",
   "description": "Demo App for TextControl Promises",
-  "packageManager": "yarn@4.10.3"
+  "packageManager": "yarn@4.12.0"
 }

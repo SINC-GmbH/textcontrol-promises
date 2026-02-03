@@ -1,16 +1,21 @@
 import { TextControlContext } from "./node_modules/@sinc-gmbh/textcontrol-promises/index.js";
 /** @import {TXTextControlTypeDefinition as TXTextControl} from "@sinc-gmbh/textcontrol-promises" */
 
-window.addTable = async function addTable(rows,columns,id) {
+window.addTable = async function addTable(rows, columns, id) {
   let txContext = new TextControlContext();
-   //Wrapper Example
+  //Wrapper Example
   let added = await txContext.tables.add(rows, columns, id);
   if (added) {
     let wrapperTable = await txContext.tables.getItem(id);
     let wrapperId = await wrapperTable.getID();
     console.log("Table with ID " + wrapperId + " added.");
   }
-}
+};
+
+window.getTable = async function getTable(id) {
+  let txContext = new TextControlContext();
+  return txContext.tables.getItem(id);
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
   let resourceUrl =
@@ -41,27 +46,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   let rows = 3;
   let columns = 3;
   let id = 101;
-  
+
   //Plain TXTextControl Example
   /** @type {TXTextControl.Table} */
   let txTable = await new Promise((resolve) => {
-    TXTextControl.tables.add(
-      rows,
-      columns,
-      id,
-      (added) => {
-        if(added) {
-          TXTextControl.tables.getItem(
-            (table) => {
-              resolve(table);
-            },
-            null,
-            id
-          );
-        }
-      });
+    TXTextControl.tables.add(rows, columns, id, (added) => {
+      if (added) {
+        TXTextControl.tables.getItem(
+          (table) => {
+            resolve(table);
+          },
+          null,
+          id,
+        );
+      }
+    });
   });
   txTable.getID((id) => {
     console.log("Table with ID " + id + " added via callback.");
-  })
+  });
 });

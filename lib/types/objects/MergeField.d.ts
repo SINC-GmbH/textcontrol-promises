@@ -2,6 +2,7 @@ import { MergeFieldTextFormat } from '../enums';
 
 /** Represents an MS Word specific MERGEFIELD field. */
 export class MergeField {
+    constructor(name?:string);
     /** Specifies a string format which is applied to date / time values. Is equivalent to the MS Word field flag "\​@". */
     dateTimeFormat: string;
     /** Specifies the name of the field. */

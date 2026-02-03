@@ -1,6 +1,6 @@
 {
   "name": "@sinc-gmbh/textcontrol-promises",
-  "version": "33.0.2",
+  "version": "34.0.0",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -19,5 +19,5 @@
   "publishConfig": {
     "@sinc-gmbh:registry": "https://npm.pkg.github.com"
   },
-  "packageManager": "yarn@4.10.3"
+  "packageManager": "yarn@4.12.0"
 }

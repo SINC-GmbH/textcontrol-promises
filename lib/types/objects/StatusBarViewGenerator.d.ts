@@ -23,11 +23,7 @@ export interface StatusBarViewGenerator {
     getSectionText(callback: RequestStringCallback, errorCallback?: ErrorCallback): void;
     /** Specifies whether the status bar shows the column number of the current text input position. */
     getShowColumn(callback: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
-    /**
-     * Specifies whether the status bar shows the key state of the CAPSLOCK and the NUMLOCK key and the current insertion mode, insert or overwrite.
-     * @deprecated Obsolete. This method will be removed in one of the next versions. Since version 33.0 the status bar doesn't show the key states anymore because they were server side properties and didn't reflect the actual state of the client anyway.
-     * @returns Always returns false.
-     */
+    /** Specifies whether the status bar shows the key state of the current insertion mode, insert or overwrite. */
     getShowKeyStates(callback: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
     /** Specifies whether the status bar shows the language of the text selection or the text input position. */
     getShowLanguage(callback: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
@@ -66,10 +62,7 @@ export interface StatusBarViewGenerator {
     setSectionText(value: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
     /** Specifies whether the status bar shows the column number of the current text input position. */
     setShowColumn(value: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
-    /**
-     * Specifies whether the status bar shows the key state of the CAPSLOCK and the NUMLOCK key and the current insertion mode, insert or overwrite.
-     * @deprecated Obsolete. This method will be removed in one of the next versions. Since version 33.0 the status bar doesn't show the key states anymore because they were server side properties and didn't reflect the actual state of the client anyway.
-     */
+    /** Specifies whether the status bar shows the key state of the current insertion mode, insert or overwrite. */
     setShowKeyStates(value: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
     /** Specifies whether the status bar shows the language of the text selection or the text input position. */
     setShowLanguage(value: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;

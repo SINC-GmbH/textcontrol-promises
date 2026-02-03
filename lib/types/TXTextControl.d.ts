@@ -43,6 +43,7 @@ import {
     SideBarType,
     SpecialZoomFactor,
     ClipboardMode,
+    InsertionMode
 } from './enums';
 import { EventMap } from './helper';
 import {
@@ -533,6 +534,10 @@ export function undo(callback?: EmptyRequestCallback, errorCallback?: ErrorCallb
  * @param errorCallback Optional. Is called when the operation failed with an error.
  */
 export function zoom(zoomFactor: number | SpecialZoomFactor, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
+/** Gets the insertion mode. */
+export function getInsertionMode(callback: RequestNumberCallback, errorCallback?: ErrorCallback): void;
+/** Sets the insertion mode. */
+export function setInsertionMode(value: InsertionMode, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
 //#endregion
 
 //#region properties
