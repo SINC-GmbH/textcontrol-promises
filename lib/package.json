@@ -19,5 +19,5 @@
   "publishConfig": {
     "@sinc-gmbh:registry": "https://npm.pkg.github.com"
   },
-  "packageManager": "yarn@4.10.3"
+  "packageManager": "yarn@4.12.0"
 }
