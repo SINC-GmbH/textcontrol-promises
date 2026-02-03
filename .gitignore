@@ -1,7 +1,7 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
-/node_modules
-/yarn-error.log
+﻿node_modules
+.vs
+yarn-error.log
+package-lock.json
+install-state.gz
+dist
+docs

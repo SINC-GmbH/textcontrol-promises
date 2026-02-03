@@ -11,21 +11,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v5.0.0
+    - uses: actions/setup-node@v6.0.0
       with:
-        node-version: '20.x'
-    - run: yarn install
-    - name: Build
-      uses: andstor/jsdoc-action@v1
-      with:
-        config_file: ./jsdoc.conf.json
+        node-version: '24.x'
+    - name: copy readme
+      run: |
+        cp README.md lib/README.md
+    - name: build documentation
+      run: |
+        yarn install
+        yarn run jsdocumentation
+      working-directory: lib
     - name: Setup Pages
-      uses: actions/configure-pages@v4
+      uses: actions/configure-pages@v5.0.0
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v4.0.0
       with:
-        path: './docs'
+        path: './lib/docs'
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4

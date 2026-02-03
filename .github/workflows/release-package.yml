@@ -2,6 +2,7 @@ name: Publish package to GitHub Packages
 on:
   release:
     types: [published]
+  workflow_dispatch: 
 jobs:
   github:
     runs-on: ubuntu-latest
@@ -9,31 +10,44 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version: '21.x'
+          always-auth: true
+          node-version: '24.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sinc-gmbh'
-      - run: yarn install --frozen-lockfile
-      - run: yarn run dts
-      - run: yarn npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Package
+        run: |
+          yarn install --immutable
+          yarn run build
+        working-directory: lib
+      - name: publisch Package to Github
+        run: |
+          yarn config set npmRegistryServer 'https://npm.pkg.github.com'
+          yarn config set npmAuthToken ${{ secrets.GITHUB_TOKEN }}
+          yarn npm publish --access public
+        working-directory: lib
   npm:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write  # Required for OIDC
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version: '21.x'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           scope: '@sinc-gmbh'
-      - run: yarn install --frozen-lockfile
-      - run: yarn run dts
-      - run: yarn npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: copy readme
+        run: |
+          cp README.md lib/README.md
+      - name: Build Package
+        run: |
+          yarn install --immutable
+          yarn run build
+        working-directory: lib
+      - name: publisch Package to Github
+        run: NODE_AUTH_TOKEN="" npm publish --access public --verbose --@sinc-gmbh:registry=https://registry.npmjs.org
+        working-directory: lib
