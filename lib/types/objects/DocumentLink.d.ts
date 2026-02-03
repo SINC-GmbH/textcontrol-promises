@@ -1,4 +1,4 @@
-import { RequestNumberCallback, RequestDocumentTargetCallback, EmptyRequestCallback } from "../callbacks";
+import { RequestNumberCallback, RequestDocumentTargetCallback, EmptyRequestCallback, RequestStringCallback } from "../callbacks";
 import { DocumentTarget } from "./DocumentTarget";
 import { TextField } from "./TextField";
 
@@ -13,4 +13,8 @@ export interface DocumentLink extends TextField {
     getDocumentTarget(callback: RequestDocumentTargetCallback, errorCallback?: ErrorCallback): void;
     /** Sets an object of the type DocumentTarget specifying to where the link points. */
     setDocumentTarget(documentTarget: DocumentTarget, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
+    /** Gets the document link's descriptive text. An empty string indicates that the link has no such text. */
+    getDescriptiveText(callback: RequestStringCallback, errorCallback?: ErrorCallback): void;
+    /** Sets the document link's descriptive text. An empty string or null can be used to delete a previously set text. */
+    setDescriptiveText(value: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
 }

@@ -1,4 +1,4 @@
-import { RequestBooleanCallback, RequestNumberCallback, RequestTableCallback, EmptyRequestCallback } from '../callbacks';
+import { RequestBooleanCallback, RequestNumberCallback, RequestTableCallback, EmptyRequestCallback, RequestStringCallback } from '../callbacks';
 import { TableAddPosition } from '../enums';
 import { TableBaseCollection } from './TableBaseCollection';
 import { TableCellCollection } from './TableCellCollection';
@@ -40,6 +40,18 @@ export interface Table {
     split(tableAddPosition: TableAddPosition, callback?: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
     /** Splits all selected table cells in this table. */
     splitCells(callback?: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
+    /**
+     * Gets the table's descriptive text.
+     * The descriptive text is used by screen readers to describe the table to users with visual impairments.
+     * An empty string is returned if no descriptive text is set.
+     */
+    getDescriptiveText(callback: RequestStringCallback, errorCallback?: ErrorCallback): void;
+    /**
+     * Sets the table's descriptive text.
+     * The descriptive text is used by screen readers to describe the table to users with visual impairments.
+     * An empty string or null can be passed to remove the descriptive text.
+     */
+    setDescriptiveText(value: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
 
     /** The collection of all table cells the table consists of. */
     cells: TableCellCollection;

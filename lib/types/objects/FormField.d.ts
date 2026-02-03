@@ -1,4 +1,4 @@
-import { EmptyRequestCallback, RequestBooleanCallback } from '../callbacks';
+import { EmptyRequestCallback, RequestBooleanCallback, RequestStringCallback } from '../callbacks';
 import { TextField } from './TextField';
 
 /** Represents a form field. */
@@ -14,4 +14,8 @@ export interface FormField extends TextField {
      * The default value of this property is true.
      */
     setEnabled(value: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
+    /** Gets the form field's descriptive text. An empty string indicates that the link has no such text. */
+    getDescriptiveText(callback: RequestStringCallback, errorCallback?: ErrorCallback): void;
+    /** Sets the form field's descriptive text. An empty string or null can be used to delete a previously set text. */
+    setDescriptiveText(value: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
 }

@@ -39,4 +39,8 @@ export interface TextFrame extends FrameBase, FormattedText {
     setInternalMargins(value: Distances, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
     /** Sets the text frame's transparency. */
     setTransparency(value: number, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
+    /** Gets the text frame's descriptive text. An empty string indicates that the text frame has no such text. */
+    getDescriptiveText(callback: RequestStringCallback, errorCallback?: ErrorCallback): void;
+    /** Sets the text frame's descriptive text. An empty string or null can be used to delete a previously set text. */
+    setDescriptiveText(value: string, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
 }

@@ -80,3 +80,4 @@ export * from './VerticalAlignment';
 export * from './ViewMode';
 export * from './ZoomOption';
 export * from './ZOrder';
+export * from './InsertionMode';
