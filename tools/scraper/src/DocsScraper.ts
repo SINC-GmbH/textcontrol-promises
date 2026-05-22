@@ -1,15 +1,12 @@
 import { chromium, Browser, Page } from 'playwright';
 import { ScrapedMethod } from './types';
 
-const DOCS_INDEX_URL =
-    'https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.api.htm';
+const TXTEXTCONTROL_OBJECT_URL =
+    'https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.object.htm';
 
 /**
- * Crawls the TX TextControl JS API documentation and extracts all method
- * signatures and descriptions.
- *
- * The docs site renders with JavaScript, so we use Playwright (headless Chrome)
- * rather than a plain HTTP fetch.
+ * Crawls the TX TextControl JS API documentation and extracts all TXTextControl
+ * method signatures and descriptions from the TXTextControl Object reference page.
  */
 export class DocsScraper {
     private browser: Browser | null = null;
@@ -28,8 +25,8 @@ export class DocsScraper {
         const page = await this.browser.newPage();
         const methods: ScrapedMethod[] = [];
 
-        // Step 1: Load the index page and collect links to individual method pages
-        await page.goto(DOCS_INDEX_URL, { waitUntil: 'networkidle' });
+        // Step 1: Load the TXTextControl Object page and collect method links from the Methods table
+        await page.goto(TXTEXTCONTROL_OBJECT_URL, { waitUntil: 'networkidle' });
         const methodLinks = await this.collectMethodLinks(page);
         console.log(`Found ${methodLinks.length} method page links`);
 
@@ -48,31 +45,43 @@ export class DocsScraper {
     }
 
     private async collectMethodLinks(page: Page): Promise<string[]> {
-        // TODO: Inspect actual docs site structure to find the correct selectors.
-        // The index page likely has a list/tree of method links.
-        // Placeholder implementation — adjust selectors after inspecting the real page.
-        const links = await page.$$eval('a[href]', (anchors) =>
-            anchors
-                .map((a) => (a as HTMLAnchorElement).href)
-                .filter((href) => href.includes('ref.javascript') && href !== window.location.href),
-        );
-        return [...new Set(links)];
+        // The TXTextControl Object page has 3 tables: Enumerations, Methods, Properties.
+        // Each table is in its own <section>, so nth-of-type doesn't work across sections.
+        // We select the second table by index (index 1 = Methods).
+        return page.evaluate(() => {
+            const tables = document.querySelectorAll('table');
+            const methodTable = tables[1];
+            if (!methodTable) return [];
+            return Array.from(methodTable.querySelectorAll('td:first-child a[href]')).map(
+                (a) => (a as HTMLAnchorElement).href,
+            );
+        });
     }
 
     private async scrapeMethodPage(page: Page, url: string): Promise<ScrapedMethod | null> {
         await page.goto(url, { waitUntil: 'networkidle' });
 
-        // TODO: Adjust these selectors to match the actual TX docs HTML structure.
-        // Common patterns: method name in an <h1>/<h2>, signature in a <pre> or <code>,
-        // description in the first <p> after the heading.
-        const name = await page.$eval('h1, h2', (el) => el.textContent?.trim() ?? '').catch(() => '');
-        const rawParams = await page.$eval('pre, code.signature', (el) => el.textContent?.trim() ?? '').catch(() => '');
-        const description = await page.$eval('p', (el) => el.textContent?.trim() ?? '').catch(() => '');
-        const deprecated = await page.$eval('*', (el) =>
-            el.textContent?.toLowerCase().includes('deprecated') ?? false,
-        ).catch(() => false);
-
+        // Method name is in H1, e.g. "beginUndoAction Method" → strip " Method" suffix
+        const rawH1 = await page.$eval('h1', (el) => el.textContent?.trim() ?? '').catch(() => '');
+        // Strip zero-width space (U+200B) and " Method" / " Property" suffix
+        const name = rawH1.replace(/​/g, '').replace(/\s+(Method|Property)$/, '').trim();
         if (!name) return null;
+
+        // Signature is in the first <pre> element:
+        // "​<void> TXTextControl.beginUndoAction(<string> actionName, [<EmptyRequestCallback> callback], [<ErrorCallback> errorCallback])"
+        const rawSig = await page.$eval('pre', (el) => el.textContent?.trim() ?? '').catch(() => '');
+        const sig = rawSig.replace(/​/g, '').trim();
+
+        // Extract just the params portion: everything between the first '(' and last ')'
+        const paramsMatch = sig.match(/\(([^]*)\)$/);
+        const rawParams = paramsMatch ? paramsMatch[1].trim() : '';
+
+        // First <p> is the method description
+        const description = await page.$eval('p', (el) => el.textContent?.replace(/​/g, '').trim() ?? '').catch(() => '');
+
+        // Check for deprecation/obsolescence
+        const bodyText = await page.$eval('body', (el) => el.textContent?.toLowerCase() ?? '').catch(() => '');
+        const deprecated = bodyText.includes('obsolete') || bodyText.includes('deprecated');
 
         return { name, rawParams, description, sourceUrl: url, deprecated };
     }
