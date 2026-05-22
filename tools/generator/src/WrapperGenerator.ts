@@ -1,15 +1,16 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { ClassifiedMethod } from './MethodClassifier';
+import { ParsedProperty } from './DtsParser';
 import { getPromiseReturnType } from './CallbackMapper';
 
 const PRIMITIVES = new Set(['string', 'number', 'boolean', 'null', 'undefined', 'void', 'any', 'unknown', 'never']);
 
 /** Formats a TypeScript type string for use in a JSDoc @param or @returns tag. */
 function formatJsDocType(tsType: string): string {
-    // Check if the type is purely primitive-ish (no TX-specific named types)
     const parts = tsType.split(/\s*[\|&]\s*/);
     const allPrimitive = parts.every(p => PRIMITIVES.has(p.trim()));
     if (allPrimitive) return tsType;
-    // Use the raw type; callers can add TXTextControlTypeDefinition. prefix as needed
     return tsType;
 }
 
@@ -17,7 +18,6 @@ function buildJsDoc(method: ClassifiedMethod): string {
     const lines: string[] = ['    /**'];
 
     if (method.jsDoc.description) {
-        // Wrap long descriptions
         lines.push(`     * ${method.jsDoc.description}`);
     }
 
@@ -57,13 +57,11 @@ function buildMethodBody(method: ClassifiedMethod): string {
         ].join('\n');
     }
 
-    // Build RequestHelper.Promise argument list
     const args: string[] = [
         `TXTextControl.${method.name}`,
         ...method.requestHelperArgs.map(a => (a.kind === 'param' ? a.name : a.constant)),
     ];
 
-    // Inline if args fit in ~100 chars, otherwise multi-line
     const inlineArgs = args.join(', ');
     const inline = `        return RequestHelper.Promise(${inlineArgs});`;
     if (inline.length <= 100) {
@@ -80,19 +78,74 @@ function buildMethodBody(method: ClassifiedMethod): string {
     ].join('\n');
 }
 
-/** Generates a single wrapper method string for insertion into a class body. */
+/** Generates a single wrapper method string. */
 export function generateMethod(method: ClassifiedMethod): string {
     return [buildJsDoc(method), buildMethodBody(method)].join('\n');
 }
 
 /**
- * Generates a complete TextControlContext-style class file from a list of classified methods.
- * Produces a JS file with JSDoc annotations (no TypeScript).
+ * Scans lib/src/ for JS wrapper class files and returns a Set of class names
+ * that have a corresponding implementation file (e.g. "TableCollection").
  */
-export function generateTextControlContextFile(methods: ClassifiedMethod[]): string {
-    const methodStrings = methods.map(m => generateMethod(m)).join('\n\n');
+function discoverWrapperClasses(libSrcDir: string): Set<string> {
+    const skip = new Set(['Collection', 'TextControlContext', 'TextControlContextBase', 'index']);
+    try {
+        return new Set(
+            fs.readdirSync(libSrcDir)
+                .filter(f => f.endsWith('.js') && !f.includes('.generated.'))
+                .map(f => path.basename(f, '.js'))
+                .filter(n => !skip.has(n)),
+        );
+    } catch {
+        return new Set();
+    }
+}
 
-    return `import { CallbackType, RequestHelper } from './helper/index.js';
+function buildPropertyGetter(prop: ParsedProperty, wrapperClasses: Set<string>): string {
+    const lines: string[] = ['    /**'];
+    if (prop.description) lines.push(`     * ${prop.description}`);
+    if (prop.deprecated) lines.push(`     * @deprecated`);
+    lines.push(`     * @type {${prop.typeText}}`);
+    lines.push(`     */`);
+
+    const hasWrapper = wrapperClasses.has(prop.typeText);
+    if (hasWrapper) {
+        lines.push(`    get ${prop.name}() { return new ${prop.typeText}(TXTextControl.${prop.name}); }`);
+    } else {
+        lines.push(`    get ${prop.name}() { return TXTextControl.${prop.name}; }`);
+    }
+    return lines.join('\n');
+}
+
+/**
+ * Generates the complete TextControlContextBase class file from classified methods
+ * and d.ts property declarations.
+ */
+export function generateTextControlContextFile(
+    methods: ClassifiedMethod[],
+    properties: ParsedProperty[],
+    libSrcDir: string,
+): string {
+    const wrapperClasses = discoverWrapperClasses(libSrcDir);
+
+    // Collect wrapper imports needed for property getters
+    const usedWrappers = properties
+        .map(p => p.typeText)
+        .filter(t => wrapperClasses.has(t));
+    const wrapperImports = [...new Set(usedWrappers)]
+        .sort()
+        .map(cls => `import { ${cls} } from './${cls}.js';`)
+        .join('\n');
+
+    const methodStrings = methods.map(m => generateMethod(m)).join('\n\n');
+    const getterStrings = properties.map(p => buildPropertyGetter(p, wrapperClasses)).join('\n\n');
+
+    const imports = [
+        wrapperImports,
+        `import { CallbackType, RequestHelper } from './helper/index.js';`,
+    ].filter(Boolean).join('\n');
+
+    return `${imports}
 /** @import * as TXTextControlTypeDefinition from "../types/TXTextControlTypeDefinition" */
 
 /**
@@ -100,8 +153,14 @@ export function generateTextControlContextFile(methods: ClassifiedMethod[]): str
  * @description Generated wrapper — do not edit by hand.
  * Re-run tools/generator to regenerate from lib/types/TXTextControl.d.ts.
  */
-export class TextControlContextGenerated {
+export class TextControlContextBase {
 ${methodStrings}
+
+    //#region properties
+
+${getterStrings}
+
+    //#endregion
 }
 `;
 }

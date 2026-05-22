@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 import * as path from 'path';
 import { Command } from 'commander';
-import { parseDts } from './DtsParser';
+import { parseDts, parseProperties } from './DtsParser';
 import { classifyMethod } from './MethodClassifier';
 import { generateMethod, generateTextControlContextFile } from './WrapperGenerator';
 import { writeFile } from './FileWriter';
@@ -36,9 +36,12 @@ const opts = program.opts<{
 
 const isDryRun = !opts.write;
 
+const LIB_SRC = path.join(LIB_ROOT, 'src');
+
 console.log(`\nParsing: ${opts.dts}`);
 const methods = parseDts(opts.dts);
-console.log(`Found ${methods.length} function declarations.\n`);
+const properties = parseProperties(opts.dts);
+console.log(`Found ${methods.length} function declarations, ${properties.length} property declarations.\n`);
 
 const classified = methods.map(classifyMethod);
 
@@ -59,7 +62,7 @@ if (opts.method) {
     process.exit(0);
 }
 
-const generatedContent = generateTextControlContextFile(classified);
+const generatedContent = generateTextControlContextFile(classified, properties, LIB_SRC);
 
 writeFile(opts.out, generatedContent, {
     dryRun: isDryRun,

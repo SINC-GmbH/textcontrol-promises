@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Project, FunctionDeclaration, Node } from 'ts-morph';
+import { Project, FunctionDeclaration, Node, VariableDeclarationKind } from 'ts-morph';
 import { isCallbackType } from './CallbackMapper';
 
 export interface ParsedParam {
@@ -111,4 +111,47 @@ export function parseDts(dtsPath: string): ParsedMethod[] {
     }
 
     return methods;
+}
+
+export interface ParsedProperty {
+    name: string;
+    typeText: string;
+    readonly: boolean;
+    description: string;
+    deprecated: boolean;
+}
+
+/**
+ * Parses all exported variable declarations (const/let) from the d.ts.
+ * These become getter properties on the generated class.
+ */
+export function parseProperties(dtsPath: string): ParsedProperty[] {
+    const absPath = path.resolve(dtsPath);
+    const project = new Project({
+        compilerOptions: { skipLibCheck: true, noEmit: true, strict: false },
+        skipAddingFilesFromTsConfig: true,
+    });
+    project.addSourceFileAtPath(absPath);
+    const sourceFile = project.getSourceFileOrThrow(absPath);
+    const props: ParsedProperty[] = [];
+
+    for (const stmt of sourceFile.getVariableStatements()) {
+        const isExported = stmt.isExported();
+        if (!isExported) continue;
+        const isConst = stmt.getDeclarationKind() === VariableDeclarationKind.Const;
+        const isLet = stmt.getDeclarationKind() === VariableDeclarationKind.Let;
+        if (!isConst && !isLet) continue;
+
+        const docs = stmt.getJsDocs();
+        const description = docs[0]?.getDescription().trim().replace(/\n\s*/g, ' ') ?? '';
+        const deprecated = docs[0]?.getTags().some(t => t.getTagName() === 'deprecated') ?? false;
+
+        for (const decl of stmt.getDeclarations()) {
+            const name = decl.getName();
+            const typeText = decl.getTypeNode()?.getText() ?? 'unknown';
+            props.push({ name, typeText, readonly: isConst, description, deprecated });
+        }
+    }
+
+    return props;
 }
