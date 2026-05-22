@@ -77,14 +77,24 @@ function inferReturnType(rawParams: string): string {
     return 'void';
 }
 
-function generateMethodStub(method: ScrapedMethod, knownClassNames: Set<string>): string {
+function generateMethodStub(method: ScrapedMethod, knownClassNames: Set<string>, isClassDecl = false): string {
     const params = convertParams(method.rawParams, knownClassNames);
     const returnType = inferReturnType(method.rawParams);
     const lines: string[] = [];
     if (method.description) lines.push(`    /** ${method.description} */`);
     if (method.deprecated) lines.push('    /** @deprecated */');
-    lines.push(`    ${method.name}(${params}): ${returnType};`);
+    // Classes use method bodies ({}) for TS; interfaces use signatures (;)
+    lines.push(isClassDecl
+        ? `    ${method.name}(${params}): ${returnType} {}`
+        : `    ${method.name}(${params}): ${returnType};`);
     return lines.join('\n');
+}
+
+function generateConstructorStub(constructorParams: string | undefined, knownClassNames: Set<string>): string {
+    const params = constructorParams
+        ? convertParams(constructorParams, knownClassNames)
+        : '';
+    return `    constructor(${params}) {}`;
 }
 
 function generatePropertyStub(prop: ScrapedClassProperty, knownClassNames: Set<string>): string {
@@ -115,15 +125,21 @@ export function generateInterface(cls: ScrapedClass, knownClassNames: Set<string
     }
 
     if (cls.description) lines.push(`/** ${cls.description} */`);
-    lines.push(`export interface ${cls.name} {`);
+    if (cls.isClass) {
+        lines.push(`export class ${cls.name} {`);
+        lines.push(generateConstructorStub(cls.constructorParams, knownClassNames));
+    } else {
+        lines.push(`export interface ${cls.name} {`);
+    }
 
+    if (cls.properties.length > 0) lines.push('');
     for (const prop of cls.properties) {
         lines.push(generatePropertyStub(prop, knownClassNames));
     }
     if (cls.properties.length > 0 && cls.methods.length > 0) lines.push('');
 
     for (const method of cls.methods) {
-        lines.push(generateMethodStub(method, knownClassNames));
+        lines.push(generateMethodStub(method, knownClassNames, cls.isClass));
     }
 
     lines.push('}');

@@ -42,6 +42,13 @@ export interface ScrapedClass {
     properties: ScrapedClassProperty[];
     sourceUrl: string;
     deprecated: boolean;
+    /**
+     * If true, this class is constructable (docs show a Constructor/Syntax section).
+     * The generated d.ts should be `export class Foo` rather than `export interface Foo`.
+     */
+    isClass: boolean;
+    /** Raw constructor parameter string from the docs, if isClass is true. */
+    constructorParams?: string;
 }
 
 // ─── Declared types (from d.ts files) ───────────────────────────────────────

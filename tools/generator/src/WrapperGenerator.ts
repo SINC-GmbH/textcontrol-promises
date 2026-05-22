@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { ClassifiedMethod } from './MethodClassifier';
-import { ParsedProperty } from './DtsParser';
+import { ParsedProperty, ParsedInterface } from './DtsParser';
 import { getPromiseReturnType, isCallbackType } from './CallbackMapper';
+import { classifyInterface, collectionItemClass, COLLECTION_BASE_METHODS, SKIP_CLASSES, ObjectKind } from './ObjectClassifier';
 
 const PRIMITIVES = new Set(['string', 'number', 'boolean', 'null', 'undefined', 'void', 'any', 'unknown', 'never']);
 const NS = 'TXTextControlTypeDefinition';
@@ -252,4 +253,187 @@ ${getterStrings}
     //#endregion
 }
 `;
+}
+
+// ─── Object / Collection base class generation ───────────────────────────────
+
+/**
+ * Builds a method body for a sub-object wrapper.
+ * txRef is either 'this.#txObj' (object) or 'this._txCollection' (collection).
+ */
+function buildObjectMethodBody(method: ClassifiedMethod, txRef: string): string {
+    const paramList = method.nonCallbackParams.map(p => p.name).join(', ');
+    const signature = `    ${method.name}(${paramList})`;
+
+    if (method.kind === 'passthrough') {
+        return [
+            signature + ' {',
+            `        return ${txRef}.${method.name}(${paramList});`,
+            '    }',
+        ].join('\n');
+    }
+
+    const args: string[] = [
+        `${txRef}.${method.name}`,
+        ...method.requestHelperArgs.map(a => (a.kind === 'param' ? a.name : a.constant)),
+    ];
+
+    const inlineArgs = args.join(', ');
+    const inline = `        return RequestHelper.Promise(${inlineArgs});`;
+    if (inline.length <= 100) {
+        return [signature + ' {', inline, '    }'].join('\n');
+    }
+
+    const multiArgs = args.map(a => `            ${a}`).join(',\n');
+    return [
+        signature + ' {',
+        '        return RequestHelper.Promise(',
+        multiArgs,
+        '        );',
+        '    }',
+    ].join('\n');
+}
+
+function generateObjectMethod(method: ClassifiedMethod, txRef: string): string {
+    return [buildJsDoc(method), buildObjectMethodBody(method, txRef)].join('\n');
+}
+
+/**
+ * Generates a FooBase.js wrapper for a lib/types/objects/*.d.ts interface.
+ * Returns the file content string, or null if the class should be skipped.
+ */
+export function generateObjectBaseFile(
+    parsed: ParsedInterface,
+    libSrcDir: string,
+): { content: string; kind: ObjectKind } | null {
+    if (SKIP_CLASSES.has(parsed.name)) return null;
+    const kind = classifyInterface(parsed);
+    if (kind === 'skip') return null;
+
+    const { classifyMethod } = require('./MethodClassifier');
+    const classified = parsed.methods.map(classifyMethod as (m: import('./DtsParser').ParsedMethod) => ClassifiedMethod);
+
+    if (kind === 'collection') {
+        return { content: generateCollectionBase(parsed, classified, libSrcDir), kind };
+    }
+    return { content: generateObjectBase(parsed, classified), kind };
+}
+
+function generateObjectBase(parsed: ParsedInterface, classified: ClassifiedMethod[]): string {
+    const txRef = 'this.#txObj';
+
+    const bindLines = classified
+        .filter(m => m.kind !== 'passthrough')
+        .map(m => `        ${txRef}.${m.name} = ${txRef}.${m.name}.bind(${txRef});`)
+        .join('\n');
+
+    const methodStrings = classified.map(m => generateObjectMethod(m, txRef)).join('\n\n');
+
+    return `import { CallbackType, RequestHelper } from '../helper/index.js';
+/** @import * as TXTextControlTypeDefinition from "../../types/TXTextControlTypeDefinition" */
+
+/**
+ * @class
+ * @description Generated wrapper — do not edit by hand.
+ * Re-run tools/generator to regenerate from lib/types/objects/${parsed.name}.d.ts.
+ */
+export class ${parsed.name}Base {
+    /** @type {any} */
+    #txObj;
+
+    /** @param {any} txObj */
+    constructor(txObj) {
+        this.#txObj = txObj;
+        this.#bindCallbacks();
+    }
+
+    #bindCallbacks() {
+${bindLines}
+    }
+
+${methodStrings}
+}
+`;
+}
+
+function generateCollectionBase(
+    parsed: ParsedInterface,
+    classified: ClassifiedMethod[],
+    libSrcDir: string,
+): string {
+    const txRef = 'this._txCollection';
+    const itemName = collectionItemClass(parsed.name);
+
+    // Only generate methods beyond Collection base (getCount/elementAt/forEach)
+    const additionalMethods = classified.filter(m => !COLLECTION_BASE_METHODS.has(m.name));
+
+    const bindLines = additionalMethods
+        .filter(m => m.kind !== 'passthrough')
+        .map(m => `        ${txRef}.${m.name} = ${txRef}.${m.name}.bind(${txRef});`)
+        .join('\n');
+
+    const methodStrings = additionalMethods.map(m => generateObjectMethod(m, txRef)).join('\n\n');
+
+    // Check if the item class file exists in libSrcDir
+    const itemFile = path.join(libSrcDir, `${itemName}.js`);
+    const itemExists = fs.existsSync(itemFile);
+    const itemImport = itemExists
+        ? `import { ${itemName} } from '../${itemName}.js';`
+        : `// TODO: create lib/src/${itemName}.js — item wrapper not found`;
+    const wrapFn = itemExists ? `(tx) => new ${itemName}(tx)` : `(tx) => tx /* TODO: wrap with ${itemName} */`;
+
+    return `import { Collection } from '../Collection.js';
+${itemImport}
+import { CallbackType, RequestHelper } from '../helper/index.js';
+/** @import * as TXTextControlTypeDefinition from "../../types/TXTextControlTypeDefinition" */
+
+/**
+ * @class
+ * @description Generated wrapper — do not edit by hand.
+ * Re-run tools/generator to regenerate from lib/types/objects/${parsed.name}.d.ts.
+ */
+export class ${parsed.name}Base extends Collection {
+    /** @param {any} txCollection */
+    constructor(txCollection) {
+        super(txCollection, ${wrapFn});
+        this.#bindCallbacks();
+    }
+
+    #bindCallbacks() {
+${bindLines}
+    }
+
+${methodStrings}
+}
+`;
+}
+
+/**
+ * If lib/src/Foo.js does not exist, writes a minimal extension stub that
+ * extends FooBase. This gives developers a clean customisation point.
+ */
+export function writeExtensionStub(
+    name: string,
+    kind: ObjectKind,
+    libSrcDir: string,
+    dryRun: boolean,
+): void {
+    const stubPath = path.join(libSrcDir, `${name}.js`);
+    if (fs.existsSync(stubPath)) return; // never overwrite hand-written code
+
+    const baseImport = `import { ${name}Base } from './generated/${name}Base.js';`;
+    const extendsClause = kind === 'collection'
+        ? `// Collection methods (getCount, elementAt, forEach, async iterator) come from Collection via ${name}Base.`
+        : '';
+    const content = `${baseImport}
+
+${extendsClause ? extendsClause + '\n' : ''}export class ${name} extends ${name}Base {}
+`;
+
+    if (dryRun) {
+        console.log(`[DRY RUN] Would create extension stub: ${stubPath}`);
+        return;
+    }
+    fs.writeFileSync(stubPath, content, 'utf-8');
+    console.log(`  Created extension stub: ${stubPath}`);
 }

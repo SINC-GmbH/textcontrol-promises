@@ -100,7 +100,10 @@ export class DocsScraper {
         // Parse events inline from the Events section (only present on seed page)
         const events = await this.parseEventsSection(page, sections.eventsTableSelector, url);
 
-        const cls: ScrapedClass = { name, description, methods, properties, sourceUrl: url, deprecated };
+        // Detect constructor (makes this a `class` rather than `interface` in d.ts)
+        const { isClass, constructorParams } = await this.parseConstructorSection(page);
+
+        const cls: ScrapedClass = { name, description, methods, properties, sourceUrl: url, deprecated, isClass, constructorParams };
         return { cls, linkedObjectUrls, events };
     }
 
@@ -307,6 +310,52 @@ export class DocsScraper {
         const deprecated = bodyText.includes('obsolete') || bodyText.includes('deprecated');
 
         return { name, rawParams, description, sourceUrl: url, deprecated };
+    }
+
+    // ─── Constructor detection ───────────────────────────────────────────────
+
+    /**
+     * Detects whether a page has a Constructor section (making the type a constructable class).
+     * Looks for headings containing "constructor" or a <pre> code block that includes "new ClassName".
+     */
+    private async parseConstructorSection(page: Page): Promise<{ isClass: boolean; constructorParams?: string }> {
+        return page.evaluate(() => {
+            // Check headings for "Constructor" or "Syntax"
+            const headings = Array.from(document.querySelectorAll('h2, h3, h4'));
+            for (const heading of headings) {
+                const text = heading.textContent?.toLowerCase().trim() ?? '';
+                if (!text.includes('constructor') && !text.includes('syntax')) continue;
+
+                // Look for a <pre> sibling with a "new " call
+                let next: Element | null = heading.nextElementSibling;
+                let tries = 0;
+                while (next && next.tagName !== 'PRE' && tries < 3) {
+                    next = next.nextElementSibling;
+                    tries++;
+                }
+                if (next && next.tagName === 'PRE') {
+                    const sig = next.textContent?.replace(/​/g, '').trim() ?? '';
+                    const newMatch = sig.match(/new\s+\w+\s*\(([^]*)\)/);
+                    if (newMatch) {
+                        return { isClass: true, constructorParams: newMatch[1].trim() };
+                    }
+                }
+                // Heading found but no parseable params
+                return { isClass: true };
+            }
+
+            // Fallback: check any <pre> on the page for "new ClassName(" pattern
+            const pres = Array.from(document.querySelectorAll('pre'));
+            for (const pre of pres) {
+                const text = pre.textContent?.replace(/​/g, '').trim() ?? '';
+                if (/^\s*new\s+\w/.test(text)) {
+                    const newMatch = text.match(/new\s+\w+\s*\(([^]*)\)/);
+                    return { isClass: true, constructorParams: newMatch ? newMatch[1].trim() : undefined };
+                }
+            }
+
+            return { isClass: false };
+        });
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────

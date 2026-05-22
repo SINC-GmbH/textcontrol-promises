@@ -73,6 +73,124 @@ function commentToString(comment: unknown): string {
     return '';
 }
 
+// ─── Interface parsing (lib/types/objects/*.d.ts) ────────────────────────────
+
+export interface ParsedInterface {
+    name: string;
+    baseInterfaces: string[];
+    genericParams: string[];
+    methods: ParsedMethod[];
+    properties: ParsedProperty[];
+    sourceFile: string;
+}
+
+function extractJsDocFromMethodSig(method: import('ts-morph').MethodSignature): JsDocInfo {
+    const docs = method.getJsDocs();
+    if (docs.length === 0) {
+        return { description: '', paramDescriptions: new Map(), deprecated: false, returnDescription: '' };
+    }
+    const doc = docs[0];
+    const description = doc.getDescription().trim().replace(/\n\s*/g, ' ');
+    const paramDescriptions = new Map<string, string>();
+    let deprecated = false;
+    let returnDescription = '';
+    for (const tag of doc.getTags()) {
+        const tagName = tag.getTagName();
+        if (tagName === 'deprecated') {
+            deprecated = true;
+        } else if (tagName === 'returns' || tagName === 'return') {
+            returnDescription = commentToString(tag.getComment()).trim();
+        } else if (Node.isJSDocParameterTag(tag)) {
+            paramDescriptions.set(tag.getName(), commentToString(tag.getComment()).trim());
+        }
+    }
+    return { description, paramDescriptions, deprecated, returnDescription };
+}
+
+/**
+ * Parses an export interface or export class from a lib/types/objects/*.d.ts file.
+ * Handles both `export interface Foo` and `export class Foo` declarations.
+ * Returns the first declaration found, or null if none.
+ */
+export function parseInterface(dtsPath: string): ParsedInterface | null {
+    const absPath = path.resolve(dtsPath);
+    const project = new Project({
+        compilerOptions: { skipLibCheck: true, noEmit: true, strict: false },
+        skipAddingFilesFromTsConfig: true,
+    });
+    project.addSourceFileAtPath(absPath);
+    const sourceFile = project.getSourceFileOrThrow(absPath);
+
+    // Try interface first, then class
+    const iface = sourceFile.getInterfaces()[0];
+    if (iface) {
+        const baseInterfaces = iface.getBaseDeclarations().map(b => b.getName() ?? '').filter(Boolean);
+        const genericParams = iface.getTypeParameters().map(tp => tp.getName());
+        const methods = parseMethodSignatures(iface.getMethods());
+        const properties = parsePropertySignatures(iface.getProperties());
+        return { name: iface.getName(), baseInterfaces, genericParams, methods, properties, sourceFile: absPath };
+    }
+
+    const cls = sourceFile.getClasses()[0];
+    if (cls) {
+        const baseClass = cls.getBaseClass();
+        const baseInterfaces = baseClass ? [baseClass.getName() ?? ''].filter(Boolean) : [];
+        const genericParams = cls.getTypeParameters().map(tp => tp.getName());
+        // getMethods() already excludes constructors in ts-morph
+        const methods = cls.getMethods()
+            .map(m => {
+                const params: ParsedParam[] = m.getParameters().map(p => {
+                    const typeText = p.getTypeNode()?.getText() ?? 'any';
+                    return { name: p.getName(), typeText, isOptional: p.isOptional(), isCallback: isCallbackType(typeText) };
+                });
+                const typeParams = m.getTypeParameters().map(tp => ({
+                    name: tp.getName(), constraint: tp.getConstraint()?.getText(),
+                }));
+                const docs = m.getJsDocs();
+                const description = docs[0]?.getDescription().trim().replace(/\n\s*/g, ' ') ?? '';
+                const deprecated = docs[0]?.getTags().some(t => t.getTagName() === 'deprecated') ?? false;
+                const jsDoc: JsDocInfo = { description, paramDescriptions: new Map(), deprecated, returnDescription: '' };
+                return { name: m.getName(), params, returnTypeText: m.getReturnTypeNode()?.getText() ?? 'void', jsDoc, typeParams };
+            });
+        // Class properties
+        const properties: ParsedProperty[] = cls.getProperties().map(prop => {
+            const docs = prop.getJsDocs();
+            const description = docs[0]?.getDescription().trim().replace(/\n\s*/g, ' ') ?? '';
+            const deprecated = docs[0]?.getTags().some(t => t.getTagName() === 'deprecated') ?? false;
+            return { name: prop.getName(), typeText: prop.getTypeNode()?.getText() ?? 'unknown', readonly: prop.isReadonly(), description, deprecated };
+        });
+        return { name: cls.getName() ?? '', baseInterfaces, genericParams, methods, properties, sourceFile: absPath };
+    }
+
+    return null;
+}
+
+function parseMethodSignatures(sigs: import('ts-morph').MethodSignature[]): ParsedMethod[] {
+    return sigs.map(method => {
+        const params: ParsedParam[] = method.getParameters().map(p => {
+            const typeText = p.getTypeNode()?.getText() ?? 'any';
+            return { name: p.getName(), typeText, isOptional: p.isOptional(), isCallback: isCallbackType(typeText) };
+        });
+        const typeParams = method.getTypeParameters().map(tp => ({ name: tp.getName(), constraint: tp.getConstraint()?.getText() }));
+        return {
+            name: method.getName(),
+            params,
+            returnTypeText: method.getReturnTypeNode()?.getText() ?? 'void',
+            jsDoc: extractJsDocFromMethodSig(method),
+            typeParams,
+        };
+    });
+}
+
+function parsePropertySignatures(props: import('ts-morph').PropertySignature[]): ParsedProperty[] {
+    return props.map(prop => {
+        const docs = prop.getJsDocs();
+        const description = docs[0]?.getDescription().trim().replace(/\n\s*/g, ' ') ?? '';
+        const deprecated = docs[0]?.getTags().some(t => t.getTagName() === 'deprecated') ?? false;
+        return { name: prop.getName(), typeText: prop.getTypeNode()?.getText() ?? 'unknown', readonly: prop.isReadonly(), description, deprecated };
+    });
+}
+
 /**
  * Parses all exported function declarations from a TXTextControl-style d.ts file.
  * Uses ts-morph so that imports are resolved automatically from the file system.
