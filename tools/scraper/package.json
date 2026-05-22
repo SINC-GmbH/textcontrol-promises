@@ -1,0 +1,20 @@
+{
+  "name": "textcontrol-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scrapes TX TextControl JS API docs and validates d.ts declarations against the real API",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "playwright": "^1.49.0",
+    "ts-morph": "^24.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
