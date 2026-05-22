@@ -18,12 +18,19 @@ export interface JsDocInfo {
     returnDescription: string;
 }
 
+export interface TypeParam {
+    name: string;
+    /** Raw constraint text, e.g. "keyof EventMap". */
+    constraint?: string;
+}
+
 export interface ParsedMethod {
     name: string;
     params: ParsedParam[];
     /** Return type text from d.ts (almost always 'void'). */
     returnTypeText: string;
     jsDoc: JsDocInfo;
+    typeParams: TypeParam[];
 }
 
 function extractJsDoc(fn: FunctionDeclaration): JsDocInfo {
@@ -102,11 +109,17 @@ export function parseDts(dtsPath: string): ParsedMethod[] {
             };
         });
 
+        const typeParams = fn.getTypeParameters().map(tp => ({
+            name: tp.getName(),
+            constraint: tp.getConstraint()?.getText(),
+        }));
+
         methods.push({
             name: fnName,
             params,
             returnTypeText: fn.getReturnTypeNode()?.getText() ?? 'void',
             jsDoc: extractJsDoc(fn),
+            typeParams,
         });
     }
 

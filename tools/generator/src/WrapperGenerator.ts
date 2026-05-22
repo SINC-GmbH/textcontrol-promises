@@ -2,19 +2,53 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ClassifiedMethod } from './MethodClassifier';
 import { ParsedProperty } from './DtsParser';
-import { getPromiseReturnType } from './CallbackMapper';
+import { getPromiseReturnType, isCallbackType } from './CallbackMapper';
 
 const PRIMITIVES = new Set(['string', 'number', 'boolean', 'null', 'undefined', 'void', 'any', 'unknown', 'never']);
+const NS = 'TXTextControlTypeDefinition';
 
-/** Formats a TypeScript type string for use in a JSDoc @param or @returns tag. */
-function formatJsDocType(tsType: string): string {
-    const parts = tsType.split(/\s*[\|&]\s*/);
-    const allPrimitive = parts.every(p => PRIMITIVES.has(p.trim()));
-    if (allPrimitive) return tsType;
-    return tsType;
+
+/**
+ * Prefixes a single type token for use in JSDoc.
+ * Types in `namedImports` are used as-is (they have individual @import statements).
+ * Other non-primitive types get the TXTextControlTypeDefinition namespace prefix.
+ */
+function qualifyType(token: string, genericParams?: Set<string>, namedImports?: Set<string>): string {
+    const t = token.trim();
+    if (!t || PRIMITIVES.has(t)) return t;
+    // Already qualified
+    if (t.includes('.')) return t;
+    // Declared generic type parameter — keep as-is
+    if (genericParams?.has(t)) return t;
+    // Single-letter uppercase = likely untracked generic param
+    if (/^[A-Z]$/.test(t)) return t;
+    // Arrow/function types — TypeScript JSDoc supports them, pass through
+    if (t.startsWith('(') || t.includes(') =>')) return t;
+    // keyof X
+    if (t.startsWith('keyof ')) {
+        return `keyof ${qualifyType(t.slice(6).trim(), genericParams, namedImports)}`;
+    }
+    // Indexed access / array: Identifier[...]
+    const bracketIdx = t.indexOf('[');
+    if (bracketIdx !== -1) {
+        const base = t.slice(0, bracketIdx);
+        const rest = t.slice(bracketIdx);
+        return `${qualifyType(base, genericParams, namedImports)}${rest}`;
+    }
+    // Complex generic syntax (Foo<T>) — pass through unchanged
+    if (t.includes('<') || t.includes('>')) return t;
+    if (isCallbackType(t)) return t;
+    // Directly imported type — use bare name so indexed access works correctly
+    if (namedImports?.has(t)) return t;
+    return `${NS}.${t}`;
 }
 
-function buildJsDoc(method: ClassifiedMethod): string {
+/** Formats a TypeScript type string for use in a JSDoc @param or @returns tag. */
+function formatJsDocType(tsType: string, genericParams?: Set<string>, namedImports?: Set<string>): string {
+    return tsType.split(/\s*\|\s*/).map(t => qualifyType(t, genericParams, namedImports)).join(' | ');
+}
+
+function buildJsDoc(method: ClassifiedMethod, namedImports?: Set<string>): string {
     const lines: string[] = ['    /**'];
 
     if (method.jsDoc.description) {
@@ -25,9 +59,16 @@ function buildJsDoc(method: ClassifiedMethod): string {
         lines.push(`     * @deprecated`);
     }
 
+    const genericParams = new Set(method.typeParams.map(tp => tp.name));
+
+    for (const tp of method.typeParams) {
+        const constraintStr = tp.constraint ? `{${formatJsDocType(tp.constraint, genericParams, namedImports)}} ` : '';
+        lines.push(`     * @template ${constraintStr}${tp.name}`);
+    }
+
     for (const p of method.nonCallbackParams) {
         const desc = method.jsDoc.paramDescriptions.get(p.name) ?? '';
-        const typeStr = formatJsDocType(p.typeText);
+        const typeStr = formatJsDocType(p.typeText, genericParams, namedImports);
         lines.push(`     * @param {${typeStr}} ${p.name}${desc ? ' ' + desc : ''}`);
     }
 
@@ -38,7 +79,7 @@ function buildJsDoc(method: ClassifiedMethod): string {
         const retDesc = method.jsDoc.returnDescription;
         lines.push(`     * @returns {Promise<${returnType}>}${retDesc ? ' ' + retDesc : ''}`);
     } else if (method.returnTypeText && method.returnTypeText !== 'void') {
-        lines.push(`     * @returns {${method.returnTypeText}}`);
+        lines.push(`     * @returns {${formatJsDocType(method.returnTypeText, genericParams, namedImports)}}`);
     }
 
     lines.push(`     */`);
@@ -79,8 +120,41 @@ function buildMethodBody(method: ClassifiedMethod): string {
 }
 
 /** Generates a single wrapper method string. */
-export function generateMethod(method: ClassifiedMethod): string {
-    return [buildJsDoc(method), buildMethodBody(method)].join('\n');
+export function generateMethod(method: ClassifiedMethod, namedImports?: Set<string>): string {
+    return [buildJsDoc(method, namedImports), buildMethodBody(method)].join('\n');
+}
+
+/**
+ * Collects types that appear as bases of indexed access expressions (Foo[Bar]) in method params
+ * and template constraints. These require individual @import statements so that Foo[T] resolves
+ * correctly in TypeScript JSDoc without a namespace prefix.
+ */
+function collectIndexedBaseTypes(methods: ClassifiedMethod[]): Set<string> {
+    const bases = new Set<string>();
+
+    function extractBase(typeText: string): void {
+        // Skip function types — the "[" inside them is not an indexed access
+        if (typeText.trimStart().startsWith('(')) return;
+        const bracketIdx = typeText.indexOf('[');
+        if (bracketIdx <= 0) return;
+        const base = typeText.slice(0, bracketIdx).trim();
+        if (!PRIMITIVES.has(base) && !/^[A-Z]$/.test(base) && !base.includes('.')) {
+            bases.add(base);
+        }
+    }
+
+    for (const method of methods) {
+        for (const p of method.nonCallbackParams) extractBase(p.typeText);
+        for (const tp of method.typeParams) {
+            if (tp.constraint) extractBase(tp.constraint);
+            // "keyof SomeType" — add the type itself as a named import
+            const keyofMatch = tp.constraint?.match(/^keyof\s+(\w+)$/);
+            if (keyofMatch && !PRIMITIVES.has(keyofMatch[1])) {
+                bases.add(keyofMatch[1]);
+            }
+        }
+    }
+    return bases;
 }
 
 /**
@@ -101,11 +175,15 @@ function discoverWrapperClasses(libSrcDir: string): Set<string> {
     }
 }
 
-function buildPropertyGetter(prop: ParsedProperty, wrapperClasses: Set<string>): string {
+function buildPropertyGetter(prop: ParsedProperty, wrapperClasses: Set<string>, namedImports?: Set<string>): string {
     const lines: string[] = ['    /**'];
     if (prop.description) lines.push(`     * ${prop.description}`);
     if (prop.deprecated) lines.push(`     * @deprecated`);
-    lines.push(`     * @type {${prop.typeText}}`);
+    // Wrapper class properties use the imported class type, not the namespace-qualified interface
+    const typeAnnotation = wrapperClasses.has(prop.typeText)
+        ? prop.typeText
+        : formatJsDocType(prop.typeText, undefined, namedImports);
+    lines.push(`     * @type {${typeAnnotation}}`);
     lines.push(`     */`);
 
     const hasWrapper = wrapperClasses.has(prop.typeText);
@@ -128,25 +206,36 @@ export function generateTextControlContextFile(
 ): string {
     const wrapperClasses = discoverWrapperClasses(libSrcDir);
 
-    // Collect wrapper imports needed for property getters
+    // Types used as indexed access bases need individual @import for TypeScript to resolve Foo[T]
+    const indexedBaseTypes = collectIndexedBaseTypes(methods);
+    const namedTypeImportLines = [...indexedBaseTypes]
+        .sort()
+        .map(t => `/** @import {${t}} from "../../types/TXTextControlTypeDefinition" */`);
+
+    // Wrapper class JS imports
     const usedWrappers = properties
         .map(p => p.typeText)
         .filter(t => wrapperClasses.has(t));
     const wrapperImports = [...new Set(usedWrappers)]
         .sort()
-        .map(cls => `import { ${cls} } from './${cls}.js';`)
+        .map(cls => `import { ${cls} } from '../${cls}.js';`)
         .join('\n');
 
-    const methodStrings = methods.map(m => generateMethod(m)).join('\n\n');
-    const getterStrings = properties.map(p => buildPropertyGetter(p, wrapperClasses)).join('\n\n');
+    const methodStrings = methods.map(m => generateMethod(m, indexedBaseTypes)).join('\n\n');
+    const getterStrings = properties.map(p => buildPropertyGetter(p, wrapperClasses, indexedBaseTypes)).join('\n\n');
 
     const imports = [
         wrapperImports,
-        `import { CallbackType, RequestHelper } from './helper/index.js';`,
+        `import { CallbackType, RequestHelper } from '../helper/index.js';`,
     ].filter(Boolean).join('\n');
 
+    const typeImports = [
+        `/** @import * as TXTextControlTypeDefinition from "../../types/TXTextControlTypeDefinition" */`,
+        ...namedTypeImportLines,
+    ].join('\n');
+
     return `${imports}
-/** @import * as TXTextControlTypeDefinition from "../types/TXTextControlTypeDefinition" */
+${typeImports}
 
 /**
  * @class

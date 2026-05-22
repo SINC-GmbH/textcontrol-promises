@@ -1,4 +1,5 @@
 #!/usr/bin/env ts-node
+import * as fs from 'fs';
 import * as path from 'path';
 import { Command } from 'commander';
 import { parseDts, parseProperties } from './DtsParser';
@@ -6,9 +7,34 @@ import { classifyMethod } from './MethodClassifier';
 import { generateMethod, generateTextControlContextFile } from './WrapperGenerator';
 import { writeFile } from './FileWriter';
 
+/**
+ * Reads each .d.ts in the callbacks directory, extracts the actual exported type alias name
+ * (e.g. "export type RequestPaperSizesCallback = ..."), and generates CallbackType.js.
+ */
+function generateCallbackTypeFile(callbacksDir: string): string {
+    const files = fs.readdirSync(callbacksDir)
+        .filter(f => f.endsWith('.d.ts'))
+        .sort();
+
+    const entries: string[] = [];
+    const exportTypeRe = /export\s+type\s+(\w+)(?:<[^>]+>)?\s*=/;
+
+    for (const file of files) {
+        const content = fs.readFileSync(path.join(callbacksDir, file), 'utf-8');
+        const match = exportTypeRe.exec(content);
+        if (!match) continue;
+        const typeName = match[1];
+        entries.push(`    /** @type {"${typeName}"} */\n    static ${typeName} = "${typeName}";`);
+    }
+
+    return `export class CallbackType {\n${entries.join('\n')}\n}\n`;
+}
+
 const LIB_ROOT = path.resolve(__dirname, '../../../lib');
 const DTS_PATH = path.join(LIB_ROOT, 'types/TXTextControl.d.ts');
-const OUT_PATH = path.join(LIB_ROOT, 'src/TextControlContext.generated.js');
+const OUT_PATH = path.join(LIB_ROOT, 'src/generated/TextControlContextBase.js');
+const CALLBACKS_DIR = path.join(LIB_ROOT, 'types/callbacks');
+const CALLBACK_TYPE_OUT = path.join(LIB_ROOT, 'src/helper/CallbackType.js');
 
 const program = new Command();
 
@@ -61,6 +87,14 @@ if (opts.method) {
     console.log(generateMethod(target));
     process.exit(0);
 }
+
+// Regenerate CallbackType.js from actual exported type names in lib/types/callbacks/
+const callbackTypeContent = generateCallbackTypeFile(CALLBACKS_DIR);
+writeFile(CALLBACK_TYPE_OUT, callbackTypeContent, {
+    dryRun: isDryRun,
+    force: opts.force,
+    onlyNew: false,
+});
 
 const generatedContent = generateTextControlContextFile(classified, properties, LIB_SRC);
 

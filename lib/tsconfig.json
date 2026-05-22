@@ -4,7 +4,8 @@
     "./types/global.d.ts",
   ],
   "exclude": [
-    "./docs/**"
+    "./docs/**",
+    "./index.js",
   ],
   "compilerOptions": {
     "module": "NodeNext",
@@ -18,5 +19,6 @@
     "checkJs": true,
     "removeComments": true,
     "outDir": "dist",
+    "rootDir": "src",
   }
 }
