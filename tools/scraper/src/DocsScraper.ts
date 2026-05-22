@@ -1,6 +1,11 @@
 import { chromium, Browser, Page } from 'playwright';
 import { ScrapedClass, ScrapedMethod, ScrapedClassProperty, ScrapedEvent } from './types';
 
+/** Full alphabetical API index — source of truth for all Object pages. */
+const API_INDEX_URL =
+    'https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.api.htm';
+
+/** The TXTextControl object page — scraped first so we can parse its Events table. */
 const SEED_URL =
     'https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.object.htm';
 
@@ -33,12 +38,25 @@ export class DocsScraper {
     async scrapeAll(): Promise<{ classes: ScrapedClass[]; events: ScrapedEvent[] }> {
         if (!this.browser) throw new Error('Call launch() before scrapeAll()');
 
+        // Seed the queue from the full API index (discovers TXTextControl.* sub-objects
+        // and any objects not reachable via the Properties-table BFS).
+        const indexPage = await this.browser.newPage();
+        await indexPage.goto(API_INDEX_URL, { waitUntil: 'networkidle' });
+        const indexObjectUrls: string[] = await indexPage.evaluate(() =>
+            Array.from(document.querySelectorAll('a[href]'))
+                .filter(a => (a as HTMLAnchorElement).href.includes('.object.htm'))
+                .map(a => (a as HTMLAnchorElement).href),
+        );
+        await indexPage.close();
+        console.log(`  API index: discovered ${indexObjectUrls.length} object pages`);
+
         const page = await this.browser.newPage();
         const classes: ScrapedClass[] = [];
         let allEvents: ScrapedEvent[] = [];
 
         const visited = new Set<string>();
-        const queue: string[] = [SEED_URL];
+        // SEED_URL first so its Events table is processed; then all API-index URLs
+        const queue: string[] = [SEED_URL, ...indexObjectUrls];
 
         while (queue.length > 0) {
             const url = queue.shift()!;
@@ -362,7 +380,12 @@ export class DocsScraper {
 
     private async parseClassName(page: Page): Promise<string> {
         const rawH1 = await page.$eval('h1', (el) => el.textContent?.trim() ?? '').catch(() => '');
-        return rawH1.replace(/​/g, '').replace(/\s+(Object|Class|Collection)$/i, '').trim();
+        return rawH1
+            .replace(/​/g, '')
+            .replace(/\s+(Object|Class|Collection)$/i, '')
+            // Strip "TXTextControl." namespace prefix (e.g. "TXTextControl.DateField" → "DateField")
+            .replace(/^TXTextControl\./, '')
+            .trim();
     }
 
     private async isPageDeprecated(page: Page): Promise<boolean> {

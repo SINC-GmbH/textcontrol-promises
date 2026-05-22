@@ -105,6 +105,7 @@ import {
     TableCollection,
     Selection
 } from './objects';
+import type { Proofing } from './objects/Proofing';
 
 //#region methods
 /**
@@ -619,6 +620,8 @@ export const paragraphFormat: ParagraphFormat;
 export const paragraphStyles: ParagraphStyleCollection;
 /** Gets a collection of all paragraphs.(Inherited from FormattedText) */
 export const paragraphs: ParagraphCollection;
+/** Provides spell-checking and dictionary methods. */
+export const Proofing: Proofing;
 /** Gets the control's ribbon bar object. */
 export const ribbon: Ribbon;
 /** Returns the "Permissions" ribbon tab object. */
