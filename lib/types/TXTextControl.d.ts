@@ -666,3 +666,28 @@ export const verticalRulerBar: RulerBarViewGenerator;
 /** @deprecated Obsolete. */
 export let zoomFactor: number | SpecialZoomFactor;
 //#endregion
+
+// --- GENERATED STUBS (review and type properly) ---
+/**
+ * Gets a value indicating whether the view generator can be a source of a Drag&Drop operation.
+ * @see https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.getallowdrag.method.htm
+ */
+export function getAllowDrag(callback: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
+
+/**
+ * Gets a value indicating whether the view generator can accept data that the user drags onto it.
+ * @see https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.getallowdrop.method.htm
+ */
+export function getAllowDrop(callback: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
+
+/**
+ * Sets a value indicating whether the view generator can be a source of a Drag&Drop operation.
+ * @see https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.setallowdrag.method.htm
+ */
+export function setAllowDrag(value: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
+
+/**
+ * Sets a value indicating whether the view generator can accept data that the user drags onto it.
+ * @see https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.setallowdrop.method.htm
+ */
+export function setAllowDrop(value: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;

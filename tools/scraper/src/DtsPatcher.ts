@@ -3,6 +3,24 @@ import * as path from 'path';
 import { DiffReport } from './types';
 
 /**
+ * Converts a raw docs parameter string to valid TypeScript parameter syntax.
+ * Docs format: `<Type> name, [<Type> optName]`
+ * TypeScript:  `name: Type, optName?: Type`
+ */
+function convertDocsParamsToTs(rawParams: string): string {
+    if (!rawParams.trim()) return '';
+    return rawParams.split(',').map(part => {
+        const trimmed = part.trim();
+        const isOptional = trimmed.startsWith('[') && trimmed.endsWith(']');
+        const inner = isOptional ? trimmed.slice(1, -1).trim() : trimmed;
+        const m = inner.match(/^<([^>]+)>\s+(\w+)$/);
+        if (!m) return trimmed; // fallback: keep as-is
+        const [, typeName, paramName] = m;
+        return `${paramName}${isOptional ? '?' : ''}: ${typeName}`;
+    }).join(', ');
+}
+
+/**
  * Applies a diff report to the d.ts file by inserting new method stubs for
  * methods found in the docs but missing from the declarations.
  *
@@ -32,13 +50,13 @@ export function patchDts(dtsPath: string, report: DiffReport, dryRun: boolean): 
     const existing = fs.readFileSync(absPath, 'utf-8');
     const stubs = newMethods.map(entry => {
         const s = entry.scraped!;
+        const tsParams = convertDocsParamsToTs(s.rawParams);
         return [
             `/**`,
             ` * ${s.description || '(no description scraped)'}`,
             ` * @see ${s.sourceUrl}`,
-            ` * TODO: Add proper parameter types.`,
             ` */`,
-            `export function ${s.name}(${s.rawParams}): void;`,
+            `export function ${s.name}(${tsParams}): void;`,
         ].join('\n');
     }).join('\n\n');
 
