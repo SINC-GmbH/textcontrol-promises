@@ -3,8 +3,8 @@ import { Project } from 'ts-morph';
 import { DeclaredMethod } from './types';
 
 /**
- * Reads the current d.ts declarations from TXTextControl.d.ts using ts-morph.
- * Returns one DeclaredMethod per exported function.
+ * Reads top-level exported function declarations from TXTextControl.d.ts.
+ * Used by the legacy single-class diff workflow.
  */
 export function readDeclaredMethods(dtsPath: string): DeclaredMethod[] {
     const absPath = path.resolve(dtsPath);
@@ -15,12 +15,17 @@ export function readDeclaredMethods(dtsPath: string): DeclaredMethod[] {
     project.addSourceFileAtPath(absPath);
     const sourceFile = project.getSourceFileOrThrow(absPath);
 
-    return sourceFile.getFunctions().map(fn => ({
-        name: fn.getName() ?? '',
-        params: fn.getParameters().map(p => {
-            const typeText = p.getTypeNode()?.getText() ?? 'any';
-            return `${p.getName()}${p.isOptional() ? '?' : ''}: ${typeText}`;
-        }).join(', '),
-        returnType: fn.getReturnTypeNode()?.getText() ?? 'void',
-    })).filter(m => m.name);
+    return sourceFile.getFunctions().map(fn => {
+        const jsDoc = fn.getJsDocs();
+        const deprecated = jsDoc.some(d => d.getTags().some(t => t.getTagName() === 'deprecated'));
+        return {
+            name: fn.getName() ?? '',
+            params: fn.getParameters().map(p => {
+                const typeText = p.getTypeNode()?.getText() ?? 'any';
+                return `${p.getName()}${p.isOptional() ? '?' : ''}: ${typeText}`;
+            }).join(', '),
+            returnType: fn.getReturnTypeNode()?.getText() ?? 'void',
+            deprecated,
+        };
+    }).filter(m => m.name);
 }
