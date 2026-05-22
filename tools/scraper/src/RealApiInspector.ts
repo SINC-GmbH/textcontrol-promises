@@ -1,91 +1,74 @@
-import * as https from 'https';
-import * as vm from 'vm';
+import { chromium } from 'playwright';
 import { RealMethod, DeclaredMethod, DiffEntry } from './types';
 
+const DEFAULT_DEMO_URL = 'http://localhost:8080';
+const INIT_TIMEOUT_MS = 30_000;
+
 /**
- * Fetches the minified TX TextControl JS file, executes it in a Node.js VM
- * sandbox, and enumerates all properties/methods on the resulting TXTextControl
- * global object.
+ * Navigates to the running TX TextControl demo app via Playwright (headless Chrome),
+ * waits for TXTextControl to fully initialize (WebSocket + all methods populated),
+ * and enumerates all methods/properties on the TXTextControl global object.
  *
- * This lets us cross-check the real API against what is declared in the d.ts.
+ * Requires the demo app to be running: cd demo && npx live-server --port=8080
  */
 export class RealApiInspector {
-    constructor(private readonly txJsUrl: string) {}
+    constructor(private readonly demoUrl: string = DEFAULT_DEMO_URL) {}
 
     async fetchAndInspect(): Promise<RealMethod[]> {
-        console.log(`Fetching: ${this.txJsUrl}`);
-        const js = await this.fetchJs(this.txJsUrl);
-        return this.inspectInSandbox(js);
-    }
-
-    private fetchJs(url: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            https.get(url, res => {
-                if (res.statusCode !== 200) {
-                    reject(new Error(`HTTP ${res.statusCode} for ${url}`));
-                    return;
-                }
-                const chunks: Buffer[] = [];
-                res.on('data', c => chunks.push(c));
-                res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
-                res.on('error', reject);
-            }).on('error', reject);
-        });
-    }
-
-    private inspectInSandbox(js: string): RealMethod[] {
-        // The TX JS expects a browser environment. We provide minimal stubs so
-        // the module-level setup code doesn't throw, then enumerate the object.
-        const sandbox: Record<string, unknown> = {
-            window: {},
-            document: { createElement: () => ({ style: {} }), getElementById: () => null },
-            navigator: { userAgent: '' },
-            TXTextControl: {},
-        };
-        sandbox['window'] = sandbox; // self-reference like a browser window
+        console.log(`Connecting to demo at: ${this.demoUrl}`);
+        const browser = await chromium.launch({ headless: true });
+        const page = await browser.newPage();
 
         try {
-            vm.runInNewContext(js, sandbox, { timeout: 10_000 });
-        } catch {
-            // Many TX versions throw during init because WebSocket / DOM is missing.
-            // That is expected; TXTextControl may still be partially populated.
-        }
+            await page.goto(this.demoUrl, { waitUntil: 'networkidle' });
 
-        const tx = sandbox['TXTextControl'];
-        if (!tx || typeof tx !== 'object') {
-            throw new Error('TXTextControl was not defined after running the JS. The sandbox may need additional browser stubs.');
-        }
+            // Wait for TX to fully initialize — editor div must have non-zero height
+            // and TXTextControl must expose more than just the WebSocket layer (init + addEventListener)
+            await page.waitForFunction(
+                () => {
+                    const tx = (window as unknown as Record<string, unknown>)['TXTextControl'];
+                    if (!tx || typeof tx !== 'object') return false;
+                    const keys = Object.keys(tx as Record<string, unknown>);
+                    // The WebSocket-only shell has ~5 keys; full API has 100+
+                    return keys.length > 20;
+                },
+                { timeout: INIT_TIMEOUT_MS },
+            );
 
-        return this.enumerateMethods(tx as Record<string, unknown>);
-    }
-
-    private enumerateMethods(obj: Record<string, unknown>, prefix = ''): RealMethod[] {
-        const results: RealMethod[] = [];
-        for (const key of Object.getOwnPropertyNames(obj)) {
-            if (key.startsWith('_') || key === 'prototype') continue;
-            const val = obj[key];
-            const name = prefix ? `${prefix}.${key}` : key;
-            if (typeof val === 'function') {
-                results.push({ name, kind: 'function' });
-            } else if (val && typeof val === 'object') {
-                results.push({ name, kind: 'object' });
-                // Recurse one level for sub-objects (collections, enums)
-                if (!prefix) {
-                    results.push(...this.enumerateMethods(val as Record<string, unknown>, name));
+            const methods = await page.evaluate((): RealMethod[] => {
+                const tx = (window as unknown as Record<string, unknown>)['TXTextControl'];
+                if (!tx || typeof tx !== 'object') return [];
+                const results: RealMethod[] = [];
+                for (const key of Object.keys(tx as Record<string, unknown>)) {
+                    if (key.startsWith('_')) continue;
+                    const val = (tx as Record<string, unknown>)[key];
+                    if (typeof val === 'function') {
+                        results.push({ name: key, kind: 'function' });
+                    } else if (val && typeof val === 'object') {
+                        results.push({ name: key, kind: 'object' });
+                    } else {
+                        results.push({ name: key, kind: 'property' });
+                    }
                 }
-            } else {
-                results.push({ name, kind: 'property' });
-            }
+                return results;
+            });
+
+            return methods;
+        } finally {
+            await browser.close();
         }
-        return results;
     }
 
-    /** Cross-check real methods against declared d.ts methods, returns gap entries. */
+    /** Cross-check real methods against declared d.ts methods, returns gap entries.
+     *  Only checks camelCase names (lowercase first letter) — skips PascalCase
+     *  names which are namespace constructors/enums, not callable API methods. */
     static crossCheck(real: RealMethod[], declared: DeclaredMethod[]): DiffEntry[] {
         const declaredNames = new Set(declared.map(d => d.name));
-        const realFunctions = real.filter(r => r.kind === 'function' && !r.name.includes('.'));
+        const realMethods = real.filter(
+            r => r.kind === 'function' && /^[a-z]/.test(r.name),
+        );
 
-        return realFunctions
+        return realMethods
             .filter(r => !declaredNames.has(r.name))
             .map(r => ({ name: r.name, kind: 'only-in-real' as const, real: r }));
     }

@@ -24,11 +24,11 @@ npx ts-node src/index.ts --report scraper-report.json
 # Patch d.ts with stubs for new methods found in the docs
 npx ts-node src/index.ts --update
 
-# Cross-check the real TX JS API (TX server must be reachable)
+# Cross-check real API via running demo app (demo must be running on localhost:8080)
 npx ts-node src/index.ts --check-real
 
-# Override the TX JS URL
-npx ts-node src/index.ts --check-real --tx-url https://tx.sinc-dev.de:44282/txwebsocket/GetResource?name=tx-document-editor.min.js
+# Override the demo URL
+npx ts-node src/index.ts --check-real --demo-url http://localhost:8080
 
 # Run browser in non-headless mode (useful for debugging scraped selectors)
 npx ts-node src/index.ts --no-headless
@@ -52,16 +52,14 @@ npx ts-node src/index.ts --no-headless
 | `DtsReader` | ts-morph reader for the current d.ts declarations |
 | `Differ` | Compares scraped vs declared, produces a `DiffReport` |
 | `DtsPatcher` | Inserts stubs for new methods into the d.ts (--update) |
-| `RealApiInspector` | Fetches the min.js, runs it in a VM, enumerates real methods |
+| `RealApiInspector` | Playwright-based: navigates to running demo, waits for TX init, enumerates methods |
 
-## Implementing DocsScraper selectors
+## Notes
 
-The `DocsScraper.collectMethodLinks()` and `scrapeMethodPage()` methods contain
-`// TODO` placeholders because the exact HTML structure of the docs site needs
-to be verified against the live page. Use the Claude MCP Playwright tool to
-inspect the docs page and update the CSS selectors accordingly.
-
-To inspect live:
-1. Run with `--no-headless` to see the browser
-2. Check what selectors match the method names, signatures, and descriptions
-3. Update the `$$eval` / `$eval` calls in `DocsScraper.ts`
+- **`--check-real` requires a running demo** — the TX TextControl JS API is
+  populated via WebSocket after `TXTextControl.init()`. The inspector navigates
+  to the demo at `http://localhost:8080`, waits up to 30s for the API to be
+  fully initialized, then enumerates all camelCase method names.
+- **Selector calibration**: `DocsScraper` scrapes the
+  [TXTextControl Object](https://docs.textcontrol.com/textcontrol/asp-dotnet/ref.javascript.txtextcontrol.object.htm)
+  page. Methods table is the second `<table>` (index 1). Signatures are in `<pre>` tags.

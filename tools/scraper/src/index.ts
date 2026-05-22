@@ -10,8 +10,7 @@ import { RealApiInspector } from './RealApiInspector';
 
 const LIB_ROOT = path.resolve(__dirname, '../../../lib');
 const DTS_PATH = path.join(LIB_ROOT, 'types/TXTextControl.d.ts');
-const DEFAULT_TX_URL =
-    'https://tx.sinc-dev.de:44282/txwebsocket/GetResource?name=tx-document-editor.min.js';
+const DEFAULT_DEMO_URL = 'http://localhost:8080';
 
 const program = new Command();
 
@@ -20,8 +19,8 @@ program
     .description('Scrapes TX TextControl API docs and validates against d.ts declarations')
     .option('--dry-run', 'Show diff without modifying any files (default)', false)
     .option('--update', 'Patch d.ts with new method stubs found in the docs')
-    .option('--check-real', 'Also fetch the real TX JS and check it against d.ts')
-    .option('--tx-url <url>', 'URL to the TX JS file for --check-real', DEFAULT_TX_URL)
+    .option('--check-real', 'Navigate to running demo app and enumerate real TXTextControl API')
+    .option('--demo-url <url>', 'Demo app URL for --check-real (must be running)', DEFAULT_DEMO_URL)
     .option('--dts <path>', 'Path to TXTextControl.d.ts', DTS_PATH)
     .option('--headless', 'Run browser headless (default true)', true)
     .option('--report <path>', 'Write JSON report to file')
@@ -31,7 +30,7 @@ const opts = program.opts<{
     dryRun: boolean;
     update: boolean;
     checkReal: boolean;
-    txUrl: string;
+    demoUrl: string;
     dts: string;
     headless: boolean;
     report?: string;
@@ -68,8 +67,9 @@ async function main(): Promise<void> {
     }
 
     if (opts.checkReal) {
-        console.log('\nFetching real TX JS API...');
-        const inspector = new RealApiInspector(opts.txUrl);
+        console.log('\nConnecting to demo app for real API inspection...');
+        console.log('(Requires demo to be running: cd demo && npx live-server --port=8080)');
+        const inspector = new RealApiInspector(opts.demoUrl);
         const realMethods = await inspector.fetchAndInspect();
         console.log(`Found ${realMethods.filter(m => m.kind === 'function').length} functions in real API`);
 
