@@ -54,10 +54,16 @@ function extractJsDoc(fn: FunctionDeclaration): JsDocInfo {
     return { description, paramDescriptions, deprecated, returnDescription };
 }
 
-function commentToString(comment: string | (Node | import('ts-morph').JSDocText | import('ts-morph').JSDocLink)[] | undefined): string {
+function commentToString(comment: unknown): string {
     if (!comment) return '';
     if (typeof comment === 'string') return comment;
-    return comment.map(c => (typeof c === 'string' ? c : c.getText())).join('');
+    if (Array.isArray(comment)) {
+        return comment
+            .filter(Boolean)
+            .map((c: unknown) => (typeof c === 'string' ? c : (c as { getText(): string }).getText()))
+            .join('');
+    }
+    return '';
 }
 
 /**
