@@ -1,5 +1,6 @@
 import { TextControlContext } from "./node_modules/@sinc-gmbh/textcontrol-promises/index.js";
-/** @import {TXTextControlTypeDefinition as TXTextControl} from "@sinc-gmbh/textcontrol-promises" */
+/** @import {TXTextControlTypeNamespace, TXTextControlInterface} from "@sinc-gmbh/textcontrol-promises" */
+/** @typedef {TXTextControlInterface & TXTextControlTypeNamespace} TXTextControl */
 
 window.addTable = async function addTable(rows, columns, id) {
   let txContext = new TextControlContext();
@@ -31,11 +32,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     },
     replaceContainer: true,
   };
-
+  
   let txContext = new TextControlContext();
   await txContext.initialize(componentSetting, resourceUrl);
   await txContext.untilTextControlLoaded();
 
+  txContext.addEventListener("tableDeleted", (stdg) => {
+    console.log("Table deleted event received.");
+  });
   //Test TXTextControl type definitions
   /** @type {TXTextControl.InputPosition.ScrollPosition} */
   var testType = TXTextControl.InputPosition.ScrollPosition.Auto;

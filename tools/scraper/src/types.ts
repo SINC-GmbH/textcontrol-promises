@@ -1,3 +1,31 @@
+// ─── Category ────────────────────────────────────────────────────────────────
+
+/**
+ * High-level kind of a scraped type page.
+ * Inferred from name patterns and page content; drives which executor handles the diff.
+ *
+ * - object:       has methods; the main API class category
+ * - arg:          event argument or callback data shape (name ends in EventArgs/CallbackData)
+ * - callback:     function type alias (name ends in Callback/Handler)
+ * - value-object: no methods, only properties (simple data container)
+ */
+export type ScrapedCategory = 'object' | 'arg' | 'callback' | 'value-object';
+
+/**
+ * Infer the category for a scraped page based on its name and content.
+ * Applied after scraping (or when loading from cache) so DocsScraper stays
+ * focused on HTML parsing and does not need to know about categories.
+ */
+export function inferCategory(
+    name: string,
+    methods: { name: string }[],
+): ScrapedCategory {
+    if (name.endsWith('Callback') || name.endsWith('Handler')) return 'callback';
+    if (name.endsWith('EventArgs') || name.endsWith('CallbackData')) return 'arg';
+    if (methods.length === 0) return 'value-object';
+    return 'object';
+}
+
 // ─── Multi-class scraped types ──────────────────────────────────────────────
 
 /** A method signature extracted from the TX TextControl HTML documentation. */
@@ -10,6 +38,12 @@ export interface ScrapedMethod {
     description: string;
     sourceUrl: string;
     deprecated: boolean;
+}
+
+/** A single member of an enumeration page (from the Members table). */
+export interface ScrapedEnumMember {
+    name: string;
+    description: string;
 }
 
 /** A property entry extracted from an object page's Properties table. */
@@ -38,6 +72,8 @@ export interface ScrapedEvent {
 export interface ScrapedClass {
     name: string;
     description: string;
+    /** High-level kind of this type. Set by inferCategory() after scraping. */
+    category?: ScrapedCategory;
     methods: ScrapedMethod[];
     properties: ScrapedClassProperty[];
     sourceUrl: string;
@@ -49,6 +85,21 @@ export interface ScrapedClass {
     isClass: boolean;
     /** Raw constructor parameter string from the docs, if isClass is true. */
     constructorParams?: string;
+    /**
+     * True when the full class page (methods + properties) has been scraped.
+     * False/absent on stubs created by --refresh-urls (URL-only discovery).
+     * Used to determine which entries can be skipped when resuming an interrupted scrape.
+     */
+    fullyScraped?: boolean;
+    /** True when the page URL ends in .enumeration.htm — type should be generated as `export enum`. */
+    isEnum?: boolean;
+    /** Members of an enumeration page (populated when isEnum is true). */
+    enumMembers?: ScrapedEnumMember[];
+    /**
+     * Name of the parent class that linked to this type (e.g. "SaveSettings" for CssSaveMode).
+     * Absent for top-level types discovered via the API index.
+     */
+    parentName?: string;
 }
 
 // ─── Declared types (from d.ts files) ───────────────────────────────────────
@@ -60,13 +111,27 @@ export interface DeclaredMethod {
     params: string;
     returnType: string;
     deprecated: boolean;
+    /** True when the declaration carries a @scraper-ignore JSDoc tag — excluded from all diff output. */
+    ignore: boolean;
 }
 
-/** An interface parsed from a lib/types/objects/*.d.ts file. */
+/** A property declaration extracted from a d.ts file. */
+export interface DeclaredProperty {
+    name: string;
+    typeText: string;
+    readonly: boolean;
+    optional: boolean;
+    deprecated: boolean;
+    /** True when the declaration carries a @scraper-ignore JSDoc tag — excluded from all diff output. */
+    ignore: boolean;
+}
+
+/** An interface parsed from a lib/types/*.d.ts file. */
 export interface DeclaredInterface {
     name: string;
     filePath: string;
     methods: DeclaredMethod[];
+    properties: DeclaredProperty[];
 }
 
 /** An event entry parsed from EventMap.d.ts. */
@@ -93,17 +158,21 @@ export interface DeprecationChange {
 export interface ClassDiffReport {
     className: string;
     sourceUrl?: string;
+    category?: ScrapedCategory;
+    filePath: string;
     newMethods: ScrapedMethod[];
     removedMethods: DeclaredMethod[];
     signatureChanges: SignatureChange[];
     deprecationChanges: DeprecationChange[];
+    newProperties: ScrapedClassProperty[];
+    removedProperties: DeclaredProperty[];
 }
 
 export interface MultiClassDiffReport {
     perClass: ClassDiffReport[];
-    /** Class names present in docs but not in lib/types/objects/. */
+    /** Class names present in docs but not in any lib/types/ subdir. */
     newClasses: string[];
-    /** Class names present in lib/types/objects/ but not found in docs. */
+    /** Class names present in lib/types/ but not found in docs. */
     removedClasses: string[];
     stats: {
         totalClasses: number;
@@ -112,6 +181,8 @@ export interface MultiClassDiffReport {
         totalSignatureChanges: number;
         totalNewClasses: number;
         totalRemovedClasses: number;
+        totalNewProperties: number;
+        totalRemovedProperties: number;
     };
 }
 

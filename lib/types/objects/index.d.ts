@@ -7,6 +7,7 @@ export * from "./BarcodeTypeSettings";
 export * from "./CheckFormField";
 export * from "./CheckFormFieldInfo";
 export * from "./Collection";
+export * from "./Color";
 export * from "./CommentCollection";
 export * from "./CommentedText";
 export * from "./CommentedTextInfo";

@@ -1,4 +1,4 @@
-import {TXTextControlTypeDefinition} from "@sinc-gmbh/textcontrol-promises";
+import {TXTextControlInterface, TXTextControlNamespace} from "@sinc-gmbh/textcontrol-promises";
 declare global{
-    var TXTextControl: typeof TXTextControlTypeDefinition;
+    var TXTextControl: TXTextControlInterface &  typeof TXTextControlNamespace;
 }

@@ -12,6 +12,8 @@ export class IfField {
     operator: RelationalOperator;
     /** Specifies whether the field's formatting should be preserved. */
     preserveFormatting: boolean;
+    /** Specifies the initial text of the field. Let this property be null to use the default text "IF". */
+    text: string;
     /** Specifies the text that should be displayed when the comparison is true. */
     trueText: string;
 }

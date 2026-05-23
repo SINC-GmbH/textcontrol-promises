@@ -20,4 +20,6 @@ export interface DocumentEditorSettings {
     userNames?: string[];
     /** Custom query parameters. */
     customQueryParams?: object;
+    /** Optional. An array of additional WebSocket sub-protocols to be passed to the WebSocket constructor. */
+    webSocketProtocols?: string[];
 }

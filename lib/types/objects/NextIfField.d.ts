@@ -10,4 +10,6 @@ export class NextIfField {
     operator: RelationalOperator;
     /** Specifies whether the field's formatting should be preserved. */
     preserveFormatting: boolean;
+    /** Specifies the initial text of the field. Let this property be null to use the default text "NEXTIF". */
+    text: string;
 }

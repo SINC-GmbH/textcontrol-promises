@@ -4,6 +4,8 @@ import { DocumentEditorSettings } from "./DocumentEditorSettings";
 export interface ComponentSettings {
     /** The ID of the editor container DIV element. */
     containerID: string;
+    /** Optional. The container DIV element. Alternative to containerID. If both are specified, containerElement takes precedence. */
+    containerElement?: HTMLDivElement;
     /** The WebSocket URL. */
     webSocketURL: string;
     /** Optional. The document editor settings */

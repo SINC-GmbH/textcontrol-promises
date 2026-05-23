@@ -107,8 +107,23 @@ function generatePropertyStub(prop: ScrapedClassProperty, knownClassNames: Set<s
     return lines.join('\n');
 }
 
+/** Generates the d.ts content for one scraped enum. */
+function generateEnum(cls: ScrapedClass): string {
+    const lines: string[] = [];
+    if (cls.description) lines.push(`/** ${cls.description} */`);
+    lines.push(`export enum ${cls.name} {`);
+    for (const member of cls.enumMembers ?? []) {
+        if (member.description) lines.push(`    /** ${member.description} */`);
+        lines.push(`    ${member.name},`);
+    }
+    lines.push('}');
+    lines.push('');
+    return lines.join('\n');
+}
+
 /** Generates the d.ts content for one scraped class. */
 export function generateInterface(cls: ScrapedClass, knownClassNames: Set<string>): string {
+    if (cls.isEnum) return generateEnum(cls);
     const lines: string[] = [];
 
     // Collect imports needed for callback types referenced in methods

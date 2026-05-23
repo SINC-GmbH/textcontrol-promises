@@ -1,11 +1,12 @@
 import { RequestBooleanCallback, EmptyRequestCallback, RequestDocumentLinkCallback } from "../callbacks";
 import { Collection } from "./Collection";
 import { DocumentLink } from "./DocumentLink";
+import { DocumentTarget } from "./DocumentTarget";
 
 /** The DocumentLinkCollection contains a collection of document links. */
 export interface DocumentLinkCollection extends Collection<DocumentLink> {
-    /** Gets a value indicating whether a new text field can be inserted at the current input position. */
-    getCanAdd(callback: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
+    /** Inserts a new document link at the current input position. */
+    add(text: string, documentTarget: DocumentTarget, callback?: RequestDocumentLinkCallback, errorCallback?: ErrorCallback): void;
     /** Removes all document links from the collection. */
     clear(keepText: boolean, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
     /** Gets the document link at the current text input position or the document link with the specified id. */

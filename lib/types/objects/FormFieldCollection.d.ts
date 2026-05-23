@@ -40,7 +40,7 @@ export interface FormFieldCollection extends Collection<FormField> {
      */
     addTextFormField(emptyWidth: number, callback?: RequestTextFormFieldCallback, errorCallback?: ErrorCallback): void;
     /** Gets the form field at the current text input position or the form field with the specified id. */
-    getItem(callback: RequestFormFieldCallback, errorCallback?: ErrorCallback): void;
+    getItem(callback: RequestFormFieldCallback, errorCallback?: ErrorCallback, id?: number): void;
     /** Removes the form field from the Text Control document. */
     remove(formField: FormField, callback?: RequestBooleanCallback, errorCallback?: ErrorCallback): void;
 }

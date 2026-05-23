@@ -32,11 +32,12 @@ export function patchEventMap(
 
     // ── Mark callback type changes ────────────────────────────────────────
     for (const change of report.callbackTypeChanges) {
+        // Do NOT use re.test() before re.replace() on a /g regex — test() advances lastIndex,
+        // causing replace() to start mid-string and miss the first occurrence.
         const re = new RegExp(`(    ${change.name}:\\s*)(${change.from})(;)`, 'g');
-        if (re.test(content)) {
-            content = content.replace(re,
-                `    // TODO: callback type changed — docs: ${change.to}\n    $1$2$3`);
-        }
+        const next = content.replace(re,
+            `    // TODO: callback type changed — docs: ${change.to}\n    $1$2$3`);
+        if (next !== content) content = next;
     }
 
     // ── Add @deprecated to newly deprecated events ────────────────────────

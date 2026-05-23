@@ -8,13 +8,22 @@ import { TextField } from './TextField';
  * Represents a part of the document, which can be the main text, a header or footer or a text frame.
  */
 export interface TextPart {
-    /** @deprecated Obsolete. */
+    /**
+     * @deprecated Obsolete.
+     * @scraper-ignore
+     */
     addSubTextPart(callback: (adddResult: AddResult) => void, subTextPart: SubTextPartInfo): void;
     /** @deprecated Obsolete. */
     addTextField(textField: TextField): void;
-    /** @deprecated Obsolete. */
+    /**
+     * @deprecated Obsolete.
+     * @scraper-ignore
+     */
     getSubTextParts(callback: (subtextparts: any[]) => void, atInputPosition?: boolean): void;
-    /** @deprecated Obsolete. */
+    /**
+     * @deprecated Obsolete.
+     * @scraper-ignore
+     */
     getTextFields(callback: (textfields: TextField[]) => void, atInputPosition?: boolean): void;
     /** @deprecated Obsolete. */
     removeSubTextPart(callback: RequestBooleanCallback, keepText?: boolean, keepNested?: boolean, subTextPart?: SubTextPartInfo): void;
