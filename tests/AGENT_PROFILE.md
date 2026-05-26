@@ -19,13 +19,33 @@ the Playwright MCP browser tools and report PASS / FAIL for each step.
 
 Before running any test case:
 
-1. Verify the demo server is running: navigate to `http://localhost:8080` with
-   `browser_navigate`. If the page fails to load, stop and report that the
-   server is not running.
-2. Wait for the TextControl editor to load: use `browser_wait_for` to wait
-   until the `#editor` element has a non-zero height (the TX editor fills it
-   when initialized).
-3. Open the browser console: some tests execute JS in the console via
+1. **Verify the demo server is running**: navigate to `http://localhost:8080`
+   with `browser_navigate`.
+   - If the page fails to load, start the server automatically:
+     ```powershell
+     wt --window 0 new-tab --title "TX Demo" cmd /k "cd /d ""c:\Users\Admin\source\repos\textcontrol-promises\demo"" && npx live-server --port=8080"
+     ```
+     Wait 3 seconds, then navigate again. If it still fails, stop and report
+     **BLOCKED: demo server could not be started**.
+
+2. **Verify the TX TextControl editor initialized**: check that
+   `#txTemplateDesignerContainer` has a non-zero height via `browser_evaluate`:
+   ```javascript
+   document.querySelector('#txTemplateDesignerContainer')?.getBoundingClientRect().height
+   ```
+   Expected: a number > 0 (typically 1220). Wait up to 10 s and retry if needed.
+
+3. **Verify there is no server-connection error**: use `browser_evaluate` to
+   check for the TX "no connection" overlay:
+   ```javascript
+   !!document.querySelector('.tx-no-connection, [class*="noConnection"]') ||
+   document.body.innerText.includes('Keine Verbindung')
+   ```
+   If this returns `true`, the TX backend at `https://tx.sinc-dev.de:44282` is
+   unreachable. Reload the page once and re-check. If still disconnected, stop
+   and report **BLOCKED: TX backend unreachable**.
+
+4. Open the browser console: some tests execute JS in the console via
    `browser_evaluate`.
 
 ## Executing a test case
@@ -39,7 +59,8 @@ Before running any test case:
 
 ## Interacting with the editor
 
-- The TX TextControl editor renders inside `#editor` as a custom element.
+- The TX TextControl editor renders inside `#txTemplateDesignerContainer`
+  (canvas-based; there is no `#editor` element in the DOM).
 - Use `browser_snapshot` before clicking to understand the current DOM state.
 - To call wrapper functions defined in `demo/main.js` (e.g. `addTable`), use
   `browser_evaluate` to execute them: `window.addTable(3, 3, 101)`.

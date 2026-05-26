@@ -165,11 +165,11 @@ function buildMethodBody(method: ClassifiedMethod, wrapperClasses?: Set<string>)
     const paramList = method.nonCallbackParams.map(p => p.name).join(', ');
     const signature = `    ${method.name}(${paramList})`;
     const resolveArg = (a: { kind: 'param' | 'callbackType'; name?: string; constant?: string }) =>
-        a.kind === 'param' ? (wrapperParams.has(a.name!) ? `${a.name}._txInternal` : a.name!) : a.constant!;
+        a.kind === 'param' ? (wrapperParams.has(a.name!) ? `${a.name}?._txInternal` : a.name!) : a.constant!;
 
     if (method.kind === 'passthrough') {
         const callArgs = method.nonCallbackParams
-            .map(p => wrapperParams.has(p.name) ? `${p.name}._txInternal` : p.name)
+            .map(p => wrapperParams.has(p.name) ? `${p.name}?._txInternal` : p.name)
             .join(', ');
         return [
             signature + ' {',
@@ -413,11 +413,11 @@ function buildObjectMethodBody(method: ClassifiedMethod, txRef: string, wrapperC
     const paramList = method.nonCallbackParams.map(p => p.name).join(', ');
     const signature = `    ${method.name}(${paramList})`;
     const resolveArg = (a: { kind: 'param' | 'callbackType'; name?: string; constant?: string }) =>
-        a.kind === 'param' ? (wrapperParams.has(a.name!) ? `${a.name}._txInternal` : a.name!) : a.constant!;
+        a.kind === 'param' ? (wrapperParams.has(a.name!) ? `${a.name}?._txInternal` : a.name!) : a.constant!;
 
     if (method.kind === 'passthrough') {
         const callArgs = method.nonCallbackParams
-            .map(p => wrapperParams.has(p.name) ? `${p.name}._txInternal` : p.name)
+            .map(p => wrapperParams.has(p.name) ? `${p.name}?._txInternal` : p.name)
             .join(', ');
         return [
             signature + ' {',
@@ -643,7 +643,7 @@ function generateCollectionMethod(
         const args = [
             `${txRef}.${method.name}`,
             ...method.requestHelperArgs.map(a =>
-                a.kind === 'param' ? (wrapperParams.has(a.name) ? `${a.name}._txInternal` : a.name) : a.constant
+                a.kind === 'param' ? (wrapperParams.has(a.name) ? `${a.name}?._txInternal` : a.name) : a.constant
             ),
         ];
         const body = [
