@@ -2,7 +2,7 @@ name: Publish package to GitHub Packages
 on:
   release:
     types: [published]
-  workflow_dispatch: 
+  workflow_dispatch:
 jobs:
   github:
     runs-on: ubuntu-latest
@@ -13,7 +13,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
-          always-auth: true
           node-version: '24.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sinc-gmbh'
@@ -22,11 +21,11 @@ jobs:
           yarn install --immutable
           yarn run build
         working-directory: lib
-      - name: publisch Package to Github
-        run: |
-          yarn config set npmRegistryServer 'https://npm.pkg.github.com'
-          yarn config set npmAuthToken ${{ secrets.GITHUB_TOKEN }}
-          yarn npm publish --access public
+      - name: Publish to GitHub Packages
+        run: yarn npm publish --access public
+        env:
+          YARN_NPM_PUBLISH_REGISTRY: https://npm.pkg.github.com
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: lib
   npm:
     runs-on: ubuntu-latest
@@ -48,6 +47,6 @@ jobs:
           yarn install --immutable
           yarn run build
         working-directory: lib
-      - name: publisch Package to Github
+      - name: Publish to npm
         run: NODE_AUTH_TOKEN="" npm publish --access public --verbose --@sinc-gmbh:registry=https://registry.npmjs.org
         working-directory: lib
