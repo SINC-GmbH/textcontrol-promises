@@ -118,7 +118,7 @@ export interface Selection {
     ): void;
     /** Informs about whether an attribute from the PageSize.Attribute enumeration has the same value for the complete selection. */
     isCommonPageSizeValueSelected(pageSizeAttribute: PageSize.Attribute, callback?: EmptyRequestCallback, errorCallback?: ErrorCallback): void;
-    /** Informs about whether an attribute from the ParagraphFormat.Attribute enumeration has the same value for the complete selection. */
+    /** Informs about whether an attribute from the ParagraphFormat.Attribute enumeration has the same value for the complete selection. @scraper-ignore */
     isCommonParagraphFormatValueSelected(
         paragraphFormatAttribute: ParagraphFormat.Attribute,
         callback?: EmptyRequestCallback,

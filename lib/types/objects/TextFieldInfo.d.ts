@@ -40,14 +40,9 @@ export interface TextFieldInfo {
     start: number;
     /** The text field's text content. */
     text: string;
-    /** The field type ("APPLICATIONFIELD" or "TEXTFIELD"). */
-    type:
-        | 'APPLICATIONFIELD'
-        | 'TEXTFIELD'
-        | 'TEXTFORMFIELD'
-        | 'CHECKFORMFIELD'
-        | 'SELECTIONFORMFIELD'
-        | 'DATEFORMFIELD'
-        | 'HYPERTEXTLINK'
-        | 'PAGENUMBERFIELD';
+    /**
+     * The field type. Docs declare this as string, but the actual values are a known union.
+     * @scraper-ignore
+     */
+    type: 'APPLICATIONFIELD' | 'TEXTFIELD' | 'TEXTFORMFIELD' | 'CHECKFORMFIELD' | 'SELECTIONFORMFIELD' | 'DATEFORMFIELD' | 'HYPERTEXTLINK' | 'PAGENUMBERFIELD';
 }

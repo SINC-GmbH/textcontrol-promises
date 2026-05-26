@@ -7,6 +7,7 @@ export * from "./BarcodeTypeSettings";
 export * from "./CheckFormField";
 export * from "./CheckFormFieldInfo";
 export * from "./Collection";
+export * from "./Color";
 export * from "./CommentCollection";
 export * from "./CommentedText";
 export * from "./CommentedTextInfo";
@@ -77,7 +78,7 @@ export * from "./ParagraphFormat";
 export * from "./ParagraphStyle";
 export * from "./ParagraphStyleCollection";
 export * from "./Point";
-export * as Proofing from "./Proofing"
+export * from "./Proofing";
 export * from "./Rectangle";
 export * from "./Ribbon";
 export * from "./RibbonPermissionsTab";

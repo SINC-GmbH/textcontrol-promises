@@ -17,6 +17,7 @@ import { TableOfContentsCollection } from "./TableOfContentsCollection";
 import { TextCharCollection } from "./TextCharCollection";
 import { TextFieldCollection } from "./TextFieldCollection";
 import { TrackedChangeCollection } from "./TrackedChangeCollection";
+import { Selection } from "./Selection";
 
 /** Represents a part of the document. */
 export interface FormattedText {

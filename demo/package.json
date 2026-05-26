@@ -2,7 +2,7 @@
   "name": "@sinc-gmbh/textcontrol-promises-demo",
   "version": "0.0.1",
   "scripts": {
-    "demo": "npx live-server"
+    "demo": "npx live-server --port=8080"
   },
   "devDependencies": {
     "@sinc-gmbh/textcontrol-promises": "link:../lib",

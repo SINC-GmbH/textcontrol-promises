@@ -8,6 +8,8 @@ export class IncludeTextField {
     fileName: string;
     /** Specifies whether the field's formatting should be preserved. */
     preserveFormatting: boolean;
+    /** Specifies the initial text of the field. Let this property be null to use the default text "INCLUDETEXT". */
+    text: string;
     /** Specifies the text format of the field. */
     textFormat: MergeFieldTextFormat;
 }

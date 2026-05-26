@@ -5,10 +5,14 @@
   "types": "index.d.ts",
   "scripts": {
     "build": "powershell Remove-Item -Recurse dist -ErrorAction SilentlyContinue; tsc",
-    "jsdocumentation": "jsdoc -c jsdoc.conf.json"
+    "jsdocumentation": "jsdoc -c jsdoc.conf.json",
+    "lint": "eslint src --ext .js"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/parser": "^8.59.4",
     "better-docs": "^2.7.3",
+    "eslint": "^10.4.0",
     "jsdoc": "^4.0.5",
     "typescript": "^5.9.3"
   },
