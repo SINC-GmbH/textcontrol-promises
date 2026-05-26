@@ -137,7 +137,8 @@ function buildJsDoc(method: ClassifiedMethod, namedImports?: Set<string>, wrappe
         const typeStr = wrapperClasses?.has(p.typeText)
             ? p.typeText
             : formatJsDocType(p.typeText, genericParams, namedImports);
-        lines.push(`     * @param {${typeStr}} ${p.name}${desc ? ' ' + desc : ''}`);
+        const paramName = p.isOptional ? `[${p.name}]` : p.name;
+        lines.push(`     * @param {${typeStr}} ${paramName}${desc ? ' ' + desc : ''}`);
     }
 
     if (method.kind !== 'passthrough') {
@@ -625,7 +626,8 @@ function generateCollectionMethod(
     for (const p of method.nonCallbackParams) {
         const desc = method.jsDoc.paramDescriptions.get(p.name) ?? '';
         const typeStr = wrapperClasses.has(p.typeText) ? p.typeText : formatJsDocType(p.typeText);
-        lines.push(`     * @param {${typeStr}} ${p.name}${desc ? ' ' + desc : ''}`);
+        const paramName = p.isOptional ? `[${p.name}]` : p.name;
+        lines.push(`     * @param {${typeStr}} ${paramName}${desc ? ' ' + desc : ''}`);
     }
 
     if (method.kind !== 'passthrough') {
