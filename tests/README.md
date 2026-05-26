@@ -14,7 +14,9 @@ tests/
 │   ├── 01-document-operations.md
 │   ├── 02-tables.md
 │   ├── 03-application-fields.md
-│   └── 04-editable-regions.md
+│   ├── 04-editable-regions.md
+│   ├── 05-form-fields.md
+│   └── 06-selection.md
 └── testcases/            Individual test cases (one per file)
     ├── document-operations/
     │   ├── TC-001-initialize-editor.md
@@ -24,9 +26,20 @@ tests/
     │   ├── TC-010-add-table.md
     │   ├── TC-011-get-table-by-id.md
     │   └── TC-012-iterate-table-cells.md
-    └── application-fields/
-        ├── TC-020-get-field-name.md
-        └── TC-021-set-field-parameters.md
+    ├── application-fields/
+    │   ├── TC-020-get-field-name.md
+    │   └── TC-021-set-field-parameters.md
+    ├── editable-regions/
+    │   ├── TC-030-add-editable-region.md
+    │   ├── TC-031-get-editable-region-count.md
+    │   └── TC-032-iterate-editable-regions.md
+    ├── form-fields/
+    │   ├── TC-040-add-text-form-field.md
+    │   └── TC-041-get-form-field-by-id.md
+    └── selection/
+        ├── TC-050-get-selection-info.md
+        ├── TC-051-set-selection.md
+        └── TC-052-apply-bold-formatting.md
 ```
 
 ## How to run tests
@@ -86,12 +99,12 @@ Claude will:
 
 ## Numbering convention
 
-| Range | Area |
-|-------|------|
-| TC-001 – TC-009 | Document operations (init, load, save) |
-| TC-010 – TC-019 | Tables |
-| TC-020 – TC-029 | Application fields |
-| TC-030 – TC-039 | Editable regions |
-| TC-040 – TC-049 | Form fields |
-| TC-050 – TC-059 | Selection and input position |
-| TC-060 – TC-069 | Events |
+| Range | Area | Testset |
+|-------|------|---------|
+| TC-001 – TC-009 | Document operations (init, load, save) | 01-document-operations.md |
+| TC-010 – TC-019 | Tables | 02-tables.md |
+| TC-020 – TC-029 | Application fields | 03-application-fields.md |
+| TC-030 – TC-039 | Editable regions | 04-editable-regions.md |
+| TC-040 – TC-049 | Form fields | 05-form-fields.md |
+| TC-050 – TC-059 | Selection and input position | 06-selection.md |
+| TC-060 – TC-069 | Events | (not yet authored) |

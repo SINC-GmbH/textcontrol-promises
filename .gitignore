@@ -10,3 +10,4 @@ docs
 tools/scraper/scrape-cache.json
 tools/scraper/diff-output.txt
 tools/scraper/diff-report.json
+report.json

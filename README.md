@@ -75,10 +75,28 @@ await txContext.untilTextControlLoaded();  // resolves when TextControlLoaded fi
 **Async iterator over a collection**
 
 ```javascript
-for await (const field of txContext.applicationFields) {
-    console.log(field.name);
+for await (const field of txContext.editableRegions) {
+    const user = await field.userName;   // cached getter — one API call max
+    console.log(user);
 }
 ```
+
+**Property caching — read and write**
+
+Hand-written wrapper classes expose JS getter properties so you can `await obj.name` instead of `await obj.getName()`. The value is fetched lazily and cached for the lifetime of the object.
+
+```javascript
+const field = /* a TextField instance */;
+
+// First access calls the TX API; subsequent reads return the cached Promise.
+const name = await field.name;
+
+// Setter updates the TX API and pre-populates the cache optimistically.
+await field.setName('NewFieldName');
+const updated = await field.name;  // returns 'NewFieldName' without a second API call
+```
+
+The underlying `getName()` / `setName()` methods from the generated base remain available if you prefer explicit calls.
 
 **Wrap a native TX object**
 
