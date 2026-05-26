@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   
   let txContext = new TextControlContext();
-  await txContext.initialize(componentSetting, resourceUrl);
+  await txContext.initialize(componentSetting);
   await txContext.untilTextControlLoaded();
 
   txContext.addEventListener("tableDeleted", (stdg) => {
