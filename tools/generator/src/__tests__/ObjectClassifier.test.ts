@@ -26,6 +26,7 @@ function makeInterface(
             name: pName,
             typeText: 'string',
             readonly: false,
+            optional: false,
             description: '',
             deprecated: false,
         })),

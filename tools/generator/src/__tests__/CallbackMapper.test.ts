@@ -88,17 +88,17 @@ describe('getPromiseReturnType', () => {
         expect(getPromiseReturnType('RequestNumbersCallback')).toBe('number[]');
     });
 
-    it('returns composite object for Add*Callback', () => {
-        expect(getPromiseReturnType('AddTextFrameCallback')).toBe('{ response: any; addResult: any }');
-        expect(getPromiseReturnType('AddTableCallback')).toBe('{ response: any; addResult: any }');
+    it('returns TXTextControlTypeDefinition.{Type}CallbackData for Add*Callback', () => {
+        expect(getPromiseReturnType('AddTextFrameCallback')).toBe('TXTextControlTypeDefinition.TextFrameCallbackData');
+        expect(getPromiseReturnType('AddTableCallback')).toBe('TXTextControlTypeDefinition.TableCallbackData');
     });
 
-    it('returns any for SaveDocumentResultCallback', () => {
-        expect(getPromiseReturnType('SaveDocumentResultCallback')).toBe('any');
+    it('returns TXTextControlTypeDefinition.SaveDocumentResult for SaveDocumentResultCallback', () => {
+        expect(getPromiseReturnType('SaveDocumentResultCallback')).toBe('TXTextControlTypeDefinition.SaveDocumentResult');
     });
 
-    it('returns any for unknown callback types', () => {
-        expect(getPromiseReturnType('RequestSomethingUnknownCallback')).toBe('any');
+    it('returns TXTextControlTypeDefinition.{Type} for unknown Request*Callback types', () => {
+        expect(getPromiseReturnType('RequestSomethingUnknownCallback')).toBe('TXTextControlTypeDefinition.SomethingUnknown');
     });
 
     it('strips | undefined before looking up', () => {

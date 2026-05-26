@@ -24,7 +24,7 @@ export function classifyMethod(method: ParsedMethod): ClassifiedMethod {
     const nonCallbackParams = method.params.filter(p => !p.isCallback);
     const callbackParams = method.params.filter(p => p.isCallback);
 
-    const errorCallback = callbackParams.find(p => p.typeText.replace(/\s*\|\s*undefined$/, '').trim() === 'ErrorCallback');
+    const errorCallback = callbackParams.find(p => p.typeText.replace(/\s*\|\s*(undefined|null)$/, '').trim() === 'ErrorCallback');
     const mainCallback = callbackParams.find(p => p !== errorCallback) ?? null;
 
     let kind: MethodKind;
@@ -41,7 +41,7 @@ export function classifyMethod(method: ParsedMethod): ClassifiedMethod {
         if (!p.isCallback) {
             return { kind: 'param', name: p.name };
         }
-        const clean = p.typeText.replace(/\s*\|\s*undefined$/, '').trim();
+        const clean = p.typeText.replace(/\s*\|\s*(undefined|null)$/, '').trim();
         return { kind: 'callbackType', constant: `CallbackType.${clean}` };
     });
 

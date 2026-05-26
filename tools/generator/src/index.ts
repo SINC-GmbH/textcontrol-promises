@@ -4,8 +4,9 @@ import * as path from 'path';
 import { Command } from 'commander';
 import { parseDts, parseProperties, parseInterface } from './DtsParser';
 import { classifyMethod } from './MethodClassifier';
-import { generateMethod, generateTextControlContextFile, generateObjectBaseFile, writeExtensionStub } from './WrapperGenerator';
+import { generateMethod, generateTextControlContextFile, generateObjectBaseFile, writeExtensionStub, generateIndexJs } from './WrapperGenerator';
 import { writeFile } from './FileWriter';
+import { collectGlobalDtsData, generateGlobalDts } from './GlobalDtsGenerator';
 
 /**
  * Reads each .d.ts in the callbacks directory, extracts the actual exported type alias name
@@ -32,10 +33,12 @@ function generateCallbackTypeFile(callbacksDir: string): string {
 
 const LIB_ROOT = path.resolve(__dirname, '../../../lib');
 const DTS_PATH = path.join(LIB_ROOT, 'types/TXTextControl.d.ts');
-const OUT_PATH = path.join(LIB_ROOT, 'src/generated/TextControlContextBase.js');
+const OUT_PATH = path.join(LIB_ROOT, 'src/generated/TXTextControlBase.js');
 const CALLBACKS_DIR = path.join(LIB_ROOT, 'types/callbacks');
 const CALLBACK_TYPE_OUT = path.join(LIB_ROOT, 'src/helper/CallbackType.js');
 const OBJECTS_DIR = path.join(LIB_ROOT, 'types/objects');
+const ENUMS_DIR = path.join(LIB_ROOT, 'types/enums');
+const GLOBAL_DTS_PATH = path.join(LIB_ROOT, 'types/global.d.ts');
 
 const program = new Command();
 
@@ -49,6 +52,7 @@ program
     .option('--method <name>', 'Generate and print only one specific method')
     .option('--objects', 'Also generate FooBase.js for all lib/types/objects/*.d.ts classes')
     .option('--class <name>', 'With --objects: generate only the named class (for spot-checking)')
+    .option('--global-dts', 'Generate lib/types/global.d.ts from objects and enums directories')
     .option('--dts <path>', 'Path to the d.ts file to parse', DTS_PATH)
     .option('--out <path>', 'Output path for the generated context file', OUT_PATH)
     .parse(process.argv);
@@ -61,6 +65,7 @@ const opts = program.opts<{
     method?: string;
     objects: boolean;
     class?: string;
+    globalDts: boolean;
     dts: string;
     out: string;
 }>();
@@ -69,7 +74,7 @@ const isDryRun = !opts.write;
 const LIB_SRC = path.join(LIB_ROOT, 'src');
 const GENERATED_DIR = path.join(LIB_SRC, 'generated');
 
-// ─── TextControlContextBase (always) ────────────────────────────────────────
+// ─── TXTextControlBase (always) ─────────────────────────────────────────────
 
 console.log(`\nParsing: ${opts.dts}`);
 const methods = parseDts(opts.dts);
@@ -159,6 +164,25 @@ if (opts.objects) {
     console.log(
         `\nObject base classes: ${stats.object} object | ${stats.collection} collection | ${stats['value-object']} value-object | ${stats.skip} skipped`
     );
+
+    // Regenerate index.js to keep exports in sync with current stubs
+    const indexPath = path.join(LIB_SRC, 'index.js');
+    const indexContent = generateIndexJs(LIB_SRC);
+    writeFile(indexPath, indexContent, { dryRun: isDryRun, force: true, onlyNew: false });
+}
+
+// ─── global.d.ts (--global-dts) ─────────────────────────────────────────────
+
+if (opts.globalDts) {
+    console.log(`\nCollecting types for global.d.ts...`);
+    const globalData = collectGlobalDtsData(OBJECTS_DIR, ENUMS_DIR);
+    console.log(
+        `  ${globalData.subNamespaceTypes.length} sub-namespace types, ` +
+        `${globalData.plainObjectTypes.length} plain object types, ` +
+        `${globalData.plainEnumTypes.length} enum types`
+    );
+    const globalContent = generateGlobalDts(globalData);
+    writeFile(GLOBAL_DTS_PATH, globalContent, { dryRun: isDryRun, force: opts.force, onlyNew: false });
 }
 
 if (isDryRun) {

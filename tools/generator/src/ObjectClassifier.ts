@@ -7,10 +7,9 @@ export const COLLECTION_BASE_METHODS = new Set(['elementAt', 'forEach', 'getCoun
 
 /**
  * Class names that have hand-written implementations and should not have a generated
- * FooBase.js counterpart. Collection.js IS the collection base — generating CollectionBase
- * would cause a circular dependency.
+ * FooBase.js counterpart.
  */
-export const SKIP_CLASSES = new Set(['Collection']);
+export const SKIP_CLASSES = new Set<string>();
 
 /**
  * Classifies a parsed interface into one of four generator target kinds.
