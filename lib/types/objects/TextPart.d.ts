@@ -1,5 +1,6 @@
 import { RequestBooleanCallback } from '../callbacks';
 import { AddResult } from '../enums';
+import { Selection } from './Selection';
 import { SubTextPartInfo } from './SubTextPartInfo';
 import { TextField } from './TextField';
 

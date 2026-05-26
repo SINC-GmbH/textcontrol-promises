@@ -11,7 +11,7 @@ export interface TableOfContentsInfo {
     /** Indicates how the text of the table of contents is highlighted. */
     highlightMode: string;
     /** The table of contents' identifier. */
-    id: Number;
+    id: number;
     /** The number of characters which belong to the table of contents. */
     length: number;
     /** The maximum structure level for this table of contents. */

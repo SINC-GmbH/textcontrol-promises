@@ -6,6 +6,8 @@
   "exclude": [
     "./docs/**",
     "./index.js",
+    "./eslint.config.js",
+    "./node_modules/**",
   ],
   "compilerOptions": {
     "module": "NodeNext",

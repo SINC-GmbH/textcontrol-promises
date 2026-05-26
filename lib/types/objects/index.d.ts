@@ -78,6 +78,7 @@ export * from "./ParagraphFormat";
 export * from "./ParagraphStyle";
 export * from "./ParagraphStyleCollection";
 export * from "./Point";
+export * from "./Proofing";
 export * from "./Rectangle";
 export * from "./Ribbon";
 export * from "./RibbonPermissionsTab";
