@@ -1,6 +1,6 @@
 {
   "name": "@sinc-gmbh/textcontrol-promises",
-  "version": "34.1.2",
+  "version": "34.1.3",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
