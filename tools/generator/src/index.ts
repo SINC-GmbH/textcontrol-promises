@@ -7,6 +7,7 @@ import { classifyMethod } from './MethodClassifier';
 import { generateMethod, generateTextControlContextFile, generateObjectBaseFile, writeExtensionStub, generateIndexJs } from './WrapperGenerator';
 import { writeFile } from './FileWriter';
 import { collectGlobalDtsData, generateGlobalDts } from './GlobalDtsGenerator';
+import { generateCallbackHelperFile } from './CallbackHelperGenerator';
 
 /**
  * Reads each .d.ts in the callbacks directory, extracts the actual exported type alias name
@@ -36,6 +37,7 @@ const DTS_PATH = path.join(LIB_ROOT, 'types/TXTextControl.d.ts');
 const OUT_PATH = path.join(LIB_ROOT, 'src/generated/TXTextControlBase.js');
 const CALLBACKS_DIR = path.join(LIB_ROOT, 'types/callbacks');
 const CALLBACK_TYPE_OUT = path.join(LIB_ROOT, 'src/helper/CallbackType.js');
+const CALLBACK_HELPER_OUT = path.join(LIB_ROOT, 'src/helper/CallbackHelper.js');
 const OBJECTS_DIR = path.join(LIB_ROOT, 'types/objects');
 const ENUMS_DIR = path.join(LIB_ROOT, 'types/enums');
 const GLOBAL_DTS_PATH = path.join(LIB_ROOT, 'types/global.d.ts');
@@ -102,6 +104,10 @@ if (opts.method) {
 // Regenerate CallbackType.js
 const callbackTypeContent = generateCallbackTypeFile(CALLBACKS_DIR);
 writeFile(CALLBACK_TYPE_OUT, callbackTypeContent, { dryRun: isDryRun, force: opts.force, onlyNew: false });
+
+// Regenerate CallbackHelper.js
+const callbackHelperContent = generateCallbackHelperFile(CALLBACKS_DIR);
+writeFile(CALLBACK_HELPER_OUT, callbackHelperContent, { dryRun: isDryRun, force: opts.force, onlyNew: false });
 
 // TextControlContextBase.js
 const generatedContent = generateTextControlContextFile(classified, properties, LIB_SRC);
